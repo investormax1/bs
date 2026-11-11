@@ -11,7 +11,7 @@
    Ne mettez JAMAIS la clé « service_role » dans ce fichier.
    ===================================================================== */
 window.CONFIG = {
-  SUPABASE_URL: "https:/znioirnkkqehrzbcxwyss.supabase.co",
+  SUPABASE_URL: "https://znioirnkkqehrzbcxwyss.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_sO8VncXXrLKDsi7yX8u5wg__uLxgNZK",
   SITE_NOM: "BookSwap",
   DEVISE: "DT"
