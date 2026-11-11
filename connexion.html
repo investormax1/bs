@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BookSwap — connexion à votre compte membre ou administrateur.">
+<meta name="theme-color" content="#16255a">
+<title>BookSwap — Connexion</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="auth">
+
+<div class="auth-wrap">
+  <div class="auth-logo">📖 Book<span>Swap</span></div>
+
+  <div class="auth-card">
+    <h1>Connexion à votre compte</h1>
+    <div id="banniereSession"></div>
+    <div class="msg" id="msgCon"></div>
+
+    <form id="formConnexion" novalidate>
+      <div class="field">
+        <label for="cMail">Adresse E-mail</label>
+        <div class="input-icon">
+          <span class="ic">✉</span>
+          <input id="cMail" type="email" placeholder="votre.adresse@mail.com" autocomplete="username" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="cPass">Mot de passe</label>
+        <div class="input-icon">
+          <span class="ic">🔒</span>
+          <input id="cPass" type="password" placeholder="••••••••" autocomplete="current-password" required>
+        </div>
+      </div>
+      <div class="auth-row">
+        <label><input type="checkbox" id="cSouvenir"> Se souvenir de moi</label>
+        <a id="lienOubli">Mot de passe oublié ?</a>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Se connecter</button>
+    </form>
+
+    <!-- Mot de passe oublié : envoi d'un lien par e-mail (Supabase Auth) -->
+    <div id="blocOubli" hidden style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px">
+      <h1 style="font-size:16px;margin-bottom:10px">Réinitialiser mon mot de passe</h1>
+      <div class="msg" id="msgOub"></div>
+      <p class="sub">Saisissez votre adresse : vous recevrez un lien sécurisé pour choisir un nouveau mot de passe.</p>
+      <form id="formOubli" novalidate>
+        <div class="field"><label for="oMail">Adresse e-mail du compte</label><input id="oMail" type="email"></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" type="button" id="btnAnnulerOubli">Annuler</button>
+          <button class="btn btn-primary" type="submit">Envoyer le lien</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="auth-sep">ou</div>
+    <p class="auth-alt"><a href="inscription.html">Créer un compte</a></p>
+  </div>
+
+  <p class="auth-legal">
+    En vous connectant, vous acceptez nos conditions d'utilisation<br>
+    et notre politique de confidentialité.<br>
+    <a href="index.html">← Retour au catalogue</a>
+  </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+"use strict";
+document.addEventListener("DOMContentLoaded", async () => {
+  const $ = s => document.querySelector(s);
+  const CLE = "bookswap.memoire";
+  if (!BS.verifierConfig()) return;
+
+  /* Espace demandé depuis la page d'accueil (?espace=membre|admin) */
+  const params = new URLSearchParams(location.search);
+  const espace = params.get("espace");
+  function destinationVoulue(p) {
+    if (espace === "admin")  return p.role === "administrateur" ? "administrateur.html" : "membre.html";
+    if (espace === "membre") return "membre.html";
+    return BS.destination(p);
+  }
+  if (espace === "admin")
+    BS.alerte("msgCon", "ok", "Espace administrateur : authentifiez-vous pour continuer.");
+  if (espace === "membre")
+    BS.alerte("msgCon", "ok", "Espace membre : authentifiez-vous pour continuer.");
+
+  /* Session existante : aucune redirection automatique */
+  const deja = await BS.profil(true);
+  if (deja) {
+    $("#banniereSession").innerHTML =
+      `<div class="banniere">Session ouverte : <b>${BS.esc(BS.nomComplet(deja))}</b> (${BS.esc(deja.role)})
+        <button class="btn btn-primary btn-sm" id="btnContinuer">Continuer</button>
+        <button class="btn btn-ghost btn-sm" id="btnChanger">Changer de compte</button></div>`;
+    $("#btnContinuer").onclick = () => location.href = destinationVoulue(deja);
+    $("#btnChanger").onclick = async () => { await BS.deconnecter(); location.href = "connexion.html?deconnexion=1"; };
+  }
+
+  try { const m = localStorage.getItem(CLE); if (m) { $("#cMail").value = m; $("#cSouvenir").checked = true; } } catch (e) {}
+
+
+  $("#formConnexion").addEventListener("submit", async e => {
+    e.preventDefault(); BS.chargement(true);
+    const r = await BS.connecter($("#cMail").value, $("#cPass").value);
+    BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgCon", "err", "✖ " + r.message);
+    try {
+      if ($("#cSouvenir").checked) localStorage.setItem(CLE, $("#cMail").value.trim());
+      else localStorage.removeItem(CLE);
+    } catch (err) {}
+    BS.alerte("msgCon", "ok", "✔ Identifiants valides — redirection…");
+    const cible = destinationVoulue(r.profil);
+    if (espace === "admin" && r.profil.role !== "administrateur")
+      BS.alerte("msgCon", "err", "Ce compte n'est pas administrateur : ouverture de l'espace membre.");
+    setTimeout(() => location.href = cible, espace === "admin" && r.profil.role !== "administrateur" ? 1800 : 600);
+  });
+
+  $("#lienOubli").onclick = () => { $("#blocOubli").hidden = false; $("#oMail").value = $("#cMail").value; $("#oMail").focus(); };
+  $("#btnAnnulerOubli").onclick = () => { $("#blocOubli").hidden = true; BS.nettoyerAlerte("msgOub"); };
+  $("#formOubli").addEventListener("submit", async e => {
+    e.preventDefault(); BS.chargement(true);
+    const r = await BS.envoyerLienReinitialisation($("#oMail").value);
+    BS.chargement(false);
+    BS.alerte("msgOub", r.ok ? "ok" : "err", (r.ok ? "✔ " : "✖ ") + r.message);
+  });
+
+  const p = new URLSearchParams(location.search);
+  if (p.has("auth")) BS.alerte("msgCon", "err", "Veuillez vous authentifier pour accéder à cet espace.");
+  if (p.has("banni")) BS.alerte("msgCon", "err", "Votre compte a été banni par l'administrateur.");
+  if (p.has("inscrit")) BS.alerte("msgCon", "ok", "Compte créé. Connectez-vous avec vos identifiants.");
+  if (p.has("deconnexion")) BS.alerte("msgCon", "ok", "Vous avez été déconnecté.");
+  if (p.has("motdepasse")) BS.alerte("msgCon", "ok", "Mot de passe modifié. Connectez-vous.");
+});
+</script>
+</body>
+</html>

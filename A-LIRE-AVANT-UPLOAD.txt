@@ -1,0 +1,93 @@
+====================================================================
+  BookSwap — DOSSIER À TÉLÉVERSER SUR GITHUB
+  هذا هو المجلّد الذي يجب رفعه إلى GitHub
+====================================================================
+
+Les 24 fichiers listés ci-dessous partent sur GitHub, rien de plus.
+Les guides de publication n'en font PAS partie : ils sont pour vous,
+et se trouvent dans le dossier « mes-guides ».
+
+IMPORTANT — sélectionnez les FICHIERS, pas le dossier qui les contient.
+   Sur github.com : « uploading an existing file », ouvrez ce dossier,
+   faites Ctrl+A et glissez les fichiers dans la zone de dépôt.
+
+--------------------------------------------------------------------
+1. PAGES DU SITE (7)
+--------------------------------------------------------------------
+index.html               Catalogue public : rechercher, voir détails,
+                         signaler, s'inscrire, se connecter
+connexion.html           Authentification + mot de passe oublié
+inscription.html         Création d'un compte membre
+reinitialisation.html    Cible du lien e-mail : nouveau mot de passe
+membre.html              Espace membre : annonces, échanges, messages
+administrateur.html      Administration : utilisateurs, modération
+404.html                 Page d'erreur, servie automatiquement
+
+--------------------------------------------------------------------
+2. CODE ET CONFIGURATION (5)
+--------------------------------------------------------------------
+style.css                Feuille de style commune
+api.js                   Moteur : accès à Supabase, authentification
+config.js                >>> LE SEUL FICHIER À MODIFIER AVANT L'ENVOI
+                             (SUPABASE_URL et SUPABASE_ANON_KEY)
+config.example.js        Modèle de configuration, laissé comme repère
+supabase-schema.sql      Script à exécuter dans Supabase (étape 2)
+
+--------------------------------------------------------------------
+3. RÉGLAGES D'HÉBERGEMENT ET RÉFÉRENCEMENT (6)
+--------------------------------------------------------------------
+vercel.json              En-têtes de sécurité, cache, pages privées
+                         exclues des moteurs de recherche
+favicon.svg              Icône du site
+manifest.webmanifest     Installation sur l'écran d'accueil mobile
+robots.txt               >>> remplacer VOTRE-SITE.vercel.app après
+sitemap.xml              >>> le premier déploiement (dans les deux)
+.gitattributes           Fins de ligne et encodage du dépôt
+
+--------------------------------------------------------------------
+4. DÉPÔT ET OUTILS (5)
+--------------------------------------------------------------------
+README.md                Page d'accueil du dépôt GitHub
+CORRESPONDANCE-RAPPORT.md  Cas d'utilisation du rapport → pages et fonctions du site
+LICENSE                  Licence MIT
+publier.sh               Envoi sur GitHub — Linux / macOS
+publier.bat              Envoi sur GitHub — Windows
+.gitignore               Fichiers à ne jamais committer
+
+(Ce fichier-ci, A-LIRE-AVANT-UPLOAD.txt, est un simple mémo :
+ vous pouvez l'envoyer ou non, cela n'a aucun effet sur le site.)
+
+--------------------------------------------------------------------
+CE QUI NE DOIT **PAS** ÊTRE ENVOYÉ
+--------------------------------------------------------------------
+- La clé service_role de Supabase : jamais, dans aucun fichier.
+- Le mot de passe de la base de données Supabase.
+- Les guides de publication (dossier « mes-guides ») : ils sont
+  destinés à votre usage personnel, pas aux visiteurs du site.
+- La version locale du site (visiteur.html, app.js…) qui fonctionne
+  sans serveur : c'est un projet séparé.
+
+--------------------------------------------------------------------
+SITE DÉJÀ PUBLIÉ ? MISE À JOUR v3 (favoris, réservé, notation, photo de profil…)
+--------------------------------------------------------------------
+1. Supabase → SQL Editor : collez TOUT supabase-schema.sql → Run.
+   (Le script se relance sans risque : aucune donnée n'est effacée.)
+2. GitHub : remplacez supabase-schema.sql, api.js, style.css,
+   index.html, membre.html, administrateur.html, README.md,
+   et ajoutez CORRESPONDANCE-RAPPORT.md.
+   Vercel redéploie automatiquement.
+
+--------------------------------------------------------------------
+LES TROIS ÉTAPES, DANS L'ORDRE
+--------------------------------------------------------------------
+1. Supabase : créer le projet, exécuter supabase-schema.sql,
+   copier les deux clés dans config.js.
+2. GitHub : créer un dépôt public « bookswap » et téléverser
+   ces fichiers.
+3. Vercel : Add New -> Project -> Import « bookswap » -> Deploy.
+   Puis reporter l'adresse obtenue dans Supabase
+   (Authentication -> URL Configuration).
+
+Détail complet : ouvrez guide-fr.html ou guide-ar.html depuis le
+dossier « mes-guides », sur votre ordinateur.
+====================================================================

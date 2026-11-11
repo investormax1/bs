@@ -1,0 +1,10 @@
+# BookSwap
+User-agent: *
+Allow: /
+# Espaces privés : inutiles pour les moteurs de recherche
+Disallow: /membre.html
+Disallow: /administrateur.html
+Disallow: /reinitialisation.html
+
+# Remplacez le domaine par celui de votre déploiement Vercel
+Sitemap: https://VOTRE-SITE.vercel.app/sitemap.xml

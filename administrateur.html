@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BookSwap — panneau d'administration : utilisateurs, annonces, signalements, messages.">
+<meta name="theme-color" content="#0f1c47">
+<title>BookSwap — Espace Administrateur</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="app">
+
+<aside class="side admin">
+  <div class="brand"><div class="t">📖 Book<span>Swap</span></div><div class="r">PANNEAU D'ADMINISTRATION</div></div>
+  <nav class="menu">
+    <a class="active" data-v="dash">📊 Tableau de bord</a>
+    <a data-v="users">👥 Gérer les utilisateurs</a>
+    <a data-v="equipe">🛡️ Administrateurs &amp; modérateurs</a>
+    <a data-v="annonces">📋 Modérer les annonces</a>
+    <a data-v="signal">⚠️ Signalements <span class="badge" id="bdgSig" hidden>0</span></a>
+    <a data-v="messages">✉️ Supervision des messages</a>
+    <a data-v="cats">🏷️ Catégories</a>
+    <div class="sep"></div>
+    <a href="index.html">🌐 Site public</a>
+    <a href="connexion.html">🔑 Changer de compte</a>
+    <a id="btnDeco">⏻ Déconnexion</a>
+  </nav>
+  <div class="who" id="who"></div>
+</aside>
+
+<main class="content">
+
+<!-- ============ TABLEAU DE BORD ============ -->
+<section class="view active" id="v-dash">
+  <h1 class="page-title">Tableau de bord — Administration</h1>
+  <p class="page-sub">Responsable technique et modérateur du site : contrôle total de la plateforme</p>
+  <div class="kpis">
+    <div class="kpi"><div class="v" id="kUsers">0</div><div class="l">Utilisateurs inscrits</div></div>
+    <div class="kpi green"><div class="v" id="kAnn">0</div><div class="l">Annonces en ligne</div></div>
+    <div class="kpi orange"><div class="v" id="kArch">0</div><div class="l">Annonces archivées</div></div>
+    <div class="kpi red"><div class="v" id="kSig">0</div><div class="l">Signalements en attente</div></div>
+  </div>
+  <div class="info-row">
+    <div class="card"><h3>Communauté</h3><div id="blocCom"></div></div>
+    <div class="card"><h3>Catalogue</h3><div id="blocCat"></div></div>
+    <div class="card"><h3>Modération</h3><div id="blocMod"></div></div>
+  </div>
+  <div class="card">
+    <h3>Activité récente de la plateforme</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Événement</th><th>Acteur</th><th>Cible</th></tr></thead>
+        <tbody id="tblActivite"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ UTILISATEURS ============ -->
+<section class="view" id="v-users">
+  <h1 class="page-title">Gérer les utilisateurs</h1>
+  <p class="page-sub">Consulter, modifier, bannir ou supprimer un compte — les rôles se gèrent dans « Administrateurs »</p>
+  <div class="card">
+    <div class="head-flex">
+      <h3>Liste complète des utilisateurs</h3>
+      <div class="filters">
+        <input id="fU" placeholder="🔍 Nom ou e-mail…">
+        <select id="fUR"><option value="">Tous les rôles</option><option value="membre">Membre</option><option value="administrateur">Administrateurs</option></select>
+        <select id="fUS"><option value="">Tous les statuts</option><option value="actif">Actif</option><option value="banni">Banni</option></select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nom complet</th><th>E-mail</th><th>Rôle</th><th>Inscription</th><th>Annonces</th><th>Crédits</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="tblUsers"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ANNONCES ============ -->
+<section class="view" id="v-annonces">
+  <h1 class="page-title">Modérer les annonces</h1>
+  <p class="page-sub">Créer, modifier, archiver, republier, conclure ou supprimer n'importe quelle annonce</p>
+  <div class="card">
+    <div class="head-flex">
+      <h3>Catalogue complet</h3>
+      <div class="filters">
+        <input id="fA" placeholder="🔍 Titre ou vendeur…">
+        <select id="fAS">
+          <option value="">Tous les statuts</option><option value="publiee">En ligne</option>
+          <option value="reservee">Réservée</option><option value="signalee">Signalée</option><option value="archivee">Archivée</option><option value="vendue">Vendue</option>
+        </select>
+        <button class="btn btn-primary btn-sm" id="btnNewAnn">+ Créer une annonce</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Livre</th><th>Auteur</th><th>Vendeur</th><th>Catégorie</th><th>Prix</th><th>Vues</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="tblAnn"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SIGNALEMENTS ============ -->
+<section class="view" id="v-signal">
+  <h1 class="page-title">Signalements</h1>
+  <p class="page-sub">Valider (archiver / supprimer), rejeter ou effacer un signalement</p>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Annonce</th><th>Motif</th><th>Description</th><th>Signalé par</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="tblSig"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MESSAGES ============ -->
+<section class="view" id="v-messages">
+  <h1 class="page-title">Supervision des messages</h1>
+  <p class="page-sub">Tous les échanges entre membres de la plateforme</p>
+  <div class="card">
+    <div class="head-flex">
+      <h3>Messages (<span id="nbMsg">0</span>)</h3>
+      <div class="filters"><input id="fM" placeholder="🔍 Expéditeur, destinataire ou contenu…"></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>De</th><th>À</th><th>Annonce</th><th>Message</th><th>Date</th><th>Lu</th><th>Actions</th></tr></thead>
+        <tbody id="tblMsg"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EQUIPE D'ADMINISTRATION ============ -->
+<section class="view" id="v-equipe">
+  <h1 class="page-title">Administrateurs &amp; modérateurs</h1>
+  <p class="page-sub">Un seul administrateur principal, qui peut nommer un modérateur pour gérer la plateforme avec lui</p>
+  <div class="card">
+    <h3>Équipe actuelle</h3>
+    <div class="msg" id="msgEquipe"></div>
+    <div class="equipe" id="listeEquipe"></div>
+  </div>
+  <div class="card" id="carteNommer" hidden>
+    <h3>Promouvoir en modérateur</h3>
+    <p style="font-size:13.5px;color:var(--muted);margin-bottom:12px" id="texteNommer"></p>
+    <div class="filters">
+      <select id="choixCoAdmin" style="min-width:280px"></select>
+      <button class="btn btn-primary btn-sm" id="btnNommer">🛡️ Promouvoir en modérateur</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Règles</h3>
+    <ul class="regles">
+      <li><b>Administrateur principal</b> — unique. Seul à pouvoir promouvoir ou retirer un modérateur, et à pouvoir transférer son rôle.</li>
+      <li><b>Modérateur</b> (co-administrateur) — mêmes outils de modération (utilisateurs, annonces, signalements, messages, catégories).
+          Il ne peut ni gérer l'équipe, ni modifier, bannir ou supprimer le compte d'un autre administrateur.</li>
+      <li>Nombre de modérateurs autorisés : <b id="maxCo">1</b> (réglable dans <code>supabase-schema.sql</code>, fonction <code>max_coadministrateurs</code>).</li>
+      <li>Ces règles sont appliquées par la base de données : elles ne peuvent pas être contournées depuis le navigateur.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ CATEGORIES ============ -->
+<section class="view" id="v-cats">
+  <h1 class="page-title">Catégories</h1>
+  <p class="page-sub">Thématiques utilisées pour faciliter la recherche des livres</p>
+  <div class="card">
+    <div class="head-flex">
+      <h3>Liste des catégories</h3>
+      <div class="filters">
+        <input id="newCat" placeholder="Nom de la nouvelle catégorie">
+        <button class="btn btn-primary btn-sm" id="btnAddCat">+ Ajouter</button>
+      </div>
+    </div>
+    <div class="msg" id="msgCat"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Nom</th><th>Livres rattachés</th><th>Actions</th></tr></thead>
+        <tbody id="tblCats"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ MODALE FICHE UTILISATEUR ============ -->
+<div class="overlay" id="mUser">
+  <div class="modal">
+    <span class="close-x" data-fermer="mUser">✕</span>
+    <h2>Fiche utilisateur</h2>
+    <p class="sub">Consultation détaillée du compte</p>
+    <div id="userDetail"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" data-fermer="mUser">Fermer</button></div>
+  </div>
+</div>
+
+<!-- ============ MODALE MODIFIER UTILISATEUR ============ -->
+<div class="overlay" id="mEditUser">
+  <div class="modal">
+    <span class="close-x" data-fermer="mEditUser">✕</span>
+    <h2>Modifier l'utilisateur</h2>
+    <p class="sub">Identité, statut et crédits — le rôle se gère depuis « Administrateurs »</p>
+    <div class="msg" id="msgUser"></div>
+    <form id="formUser" novalidate>
+      <input type="hidden" id="uId">
+      <div class="row">
+        <div class="field"><label for="uNom">Nom *</label><input id="uNom"></div>
+        <div class="field"><label for="uPrenom">Prénom</label><input id="uPrenom"></div>
+      </div>
+      <div class="field"><label for="uMail">Adresse e-mail</label><input id="uMail" readonly></div>
+      <div class="row">
+        <div class="field"><label for="uTel">Téléphone</label><input id="uTel" type="tel"></div>
+        <div class="field"><label for="uAdr">Ville</label><input id="uAdr"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="uRole">Rôle</label><input id="uRole" readonly title="Les rôles se gèrent depuis « Administrateurs »"></div>
+        <div class="field"><label for="uStatut">Statut</label>
+          <select id="uStatut"><option value="actif">Actif</option><option value="banni">Banni</option></select></div>
+        <div class="field"><label for="uCredits">Crédits</label><input id="uCredits" type="number" min="0" value="0"></div>
+        <div class="field"><label for="uReputation">Réputation</label><input id="uReputation" type="number" min="0" max="5" step="0.1" value="0"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" type="button" data-fermer="mEditUser">Annuler</button>
+        <button class="btn btn-primary" type="submit">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODALE ANNONCE ============ -->
+<div class="overlay" id="mEditAnn">
+  <div class="modal wide">
+    <span class="close-x" data-fermer="mEditAnn">✕</span>
+    <h2 id="titreAnn">Créer une annonce</h2>
+    <p class="sub">L'administrateur peut publier ou corriger l'annonce de n'importe quel membre</p>
+    <div class="msg" id="msgAnn"></div>
+    <form id="formAnn" novalidate>
+      <input type="hidden" id="anId">
+      <div class="field"><label for="anVendeur">Vendeur *</label><select id="anVendeur"></select></div>
+      <div class="field"><label for="anTitre">Titre du livre *</label><input id="anTitre"></div>
+      <div class="row">
+        <div class="field"><label for="anAuteur">Auteur *</label><input id="anAuteur"></div>
+        <div class="field"><label for="anIsbn">ISBN</label><input id="anIsbn"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="anCat">Catégorie</label><select id="anCat"></select></div>
+        <div class="field"><label for="anType">Type</label>
+          <select id="anType"><option>Vente</option><option>Échange</option><option>Don</option></select></div>
+        <div class="field"><label for="anStatut">Statut</label>
+          <select id="anStatut"><option value="publiee">En ligne</option><option value="reservee">Réservée</option><option value="signalee">Signalée</option>
+            <option value="archivee">Archivée</option><option value="vendue">Vendue</option></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="anPrix">Prix</label><input id="anPrix" type="number" min="0" step="0.5" value="0"></div>
+        <div class="field"><label for="anAnnee">Année</label><input id="anAnnee" type="number"></div>
+        <div class="field"><label for="anEtat">État</label>
+          <select id="anEtat"><option>Comme neuf</option><option selected>Bon état</option><option>Correct</option><option>Usé</option></select></div>
+      </div>
+      <div class="field"><label for="anDesc">Description</label><textarea id="anDesc" rows="3"></textarea></div>
+      <div class="field">
+        <label>Photos du livre <span class="nb-img">— 1 principale + 3 autres</span></label>
+        <div id="anImages"></div>
+        <p class="aide">La première est l'image principale ; ★ pour en choisir une autre, ✕ pour la retirer.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" type="button" data-fermer="mEditAnn">Annuler</button>
+        <button class="btn btn-primary" type="submit" id="btnEnregAnn">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+"use strict";
+document.addEventListener("DOMContentLoaded", async () => {
+  const $ = s => document.querySelector(s);
+  const admin = await BS.exigerRole("administrateur");
+  if (!admin) return;
+
+  let profils = [], annonces = [], sigs = [], msgs = [], cats = [], trans = [];
+
+  function go(v) {
+    document.querySelectorAll(".view").forEach(s => s.classList.remove("active"));
+    const el = document.getElementById("v-" + v); if (el) el.classList.add("active");
+    document.querySelectorAll(".menu a[data-v]").forEach(a => a.classList.toggle("active", a.dataset.v === v));
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll(".menu a[data-v]").forEach(a => a.onclick = () => go(a.dataset.v));
+
+  const ligne = (g, d) => `<div class="line"><span>${g}</span><b>${d}</b></div>`;
+  const libelleA = s => ({ publiee: "En ligne", reservee: "Réservée", signalee: "Signalée", archivee: "Archivée", vendue: "Vendue" }[s] || s);
+  const roleFR = r => (r === "administrateur" ? "Administrateur" : "Membre");
+  const profil = id => profils.find(p => p.id === id);
+  const principal = () => BS.estAdminPrincipal(admin);
+  /* Un co-administrateur ne touche pas aux comptes des autres administrateurs */
+  const peutGerer = p => p.role !== "administrateur" || (principal() && p.id !== admin.id);
+  const badgeRole = p => `<span class="role ${p.role === "administrateur" ? "admin" : ""} ${BS.estAdminPrincipal(p) ? "principal" : ""}">${BS.libelleRole(p)}</span>`;
+  let maxCo = 1;
+
+  async function charger() {
+    BS.chargement(true);
+    [profils, annonces, sigs, msgs, cats, trans] = await Promise.all([
+      BS.listerProfils(), BS.toutesAnnonces(), BS.signalements(),
+      BS.tousMessages(), BS.categories(), BS.toutesTransactions()
+    ]);
+    /* Le rôle de la personne connectée a pu changer (transfert, retrait) */
+    const moiMaj = profils.find(p => p.id === admin.id);
+    if (moiMaj) Object.assign(admin, moiMaj);
+    BS.chargement(false);
+    if (admin.role !== "administrateur") { location.replace("membre.html"); return; }
+    rendreDash(); rendreUsers(); rendreEquipe(); rendreAnnonces(); rendreSigs(); rendreMessages(); rendreCats();
+  }
+
+  /* ---------- Tableau de bord ---------- */
+  function rendreDash() {
+    $("#who").innerHTML = "<b>" + BS.esc(BS.nomComplet(admin)) + "</b>" + BS.esc(BS.libelleRole(admin)) + "<br>" + BS.esc(admin.email);
+    $("#kUsers").textContent = profils.length;
+    $("#kAnn").textContent = annonces.filter(a => a.statut === "publiee").length;
+    $("#kArch").textContent = annonces.filter(a => a.statut === "archivee").length;
+    const ns = sigs.filter(s => s.statut === "en_attente").length;
+    $("#kSig").textContent = ns;
+    const b = $("#bdgSig"); b.textContent = ns; b.hidden = ns === 0;
+
+    $("#blocCom").innerHTML =
+      ligne("👥 Membres", profils.filter(p => p.role === "membre").length) +
+      ligne("🛡️ Administrateur principal", BS.esc(BS.nomComplet(profils.find(BS.estAdminPrincipal)) || "—")) +
+      ligne("🤝 Modérateurs", profils.filter(BS.estCoAdmin).length + " / " + maxCo) +
+      ligne("🚫 Comptes bannis", profils.filter(p => p.statut === "banni").length);
+    $("#blocCat").innerHTML =
+      ligne("📗 Annonces totales", annonces.length) +
+      ligne("💰 Transactions conclues", trans.length) +
+      ligne("🏷️ Catégories", cats.length);
+    $("#blocMod").innerHTML =
+      ligne("⚠️ Signalements en attente", ns) +
+      ligne("✅ Signalements traités", sigs.filter(s => s.statut === "traite").length) +
+      ligne("✉️ Messages échangés", msgs.length);
+
+    const evts = [];
+    profils.forEach(p => evts.push({ d: p.created_at, e: "Inscription d'un utilisateur", a: BS.nomComplet(p), c: roleFR(p.role) }));
+    annonces.forEach(a => evts.push({ d: a.created_at, e: "Annonce publiée", a: a.vendeur_nom, c: a.titre }));
+    sigs.forEach(s => evts.push({ d: s.created_at, e: "Signalement reçu", a: s.auteur, c: s.titre_annonce }));
+    trans.forEach(t => evts.push({ d: t.created_at, e: "Transaction conclue", a: BS.nomComplet(profil(t.vendeur_id)), c: t.titre }));
+    evts.sort((x, y) => new Date(y.d) - new Date(x.d));
+    $("#tblActivite").innerHTML = evts.length
+      ? evts.slice(0, 10).map(v => `<tr><td>${BS.dateFR(v.d)}</td><td>${BS.esc(v.e)}</td><td>${BS.esc(v.a || "—")}</td><td>${BS.esc(v.c || "—")}</td></tr>`).join("")
+      : '<tr><td colspan="4" class="empty-row">Aucune activité enregistrée.</td></tr>';
+  }
+
+  /* ---------- Utilisateurs ---------- */
+  function rendreUsers() {
+    const q = $("#fU").value.toLowerCase().trim(), r = $("#fUR").value, s = $("#fUS").value;
+    const res = profils.filter(p =>
+      (!q || BS.nomComplet(p).toLowerCase().includes(q) || (p.email || "").toLowerCase().includes(q)) &&
+      (!r || p.role === r) && (!s || p.statut === s));
+    $("#tblUsers").innerHTML = res.length ? res.map(p => `
+      <tr>
+        <td><b>${BS.esc(BS.nomComplet(p))}</b></td><td>${BS.esc(p.email)}</td>
+        <td>${badgeRole(p)}</td>
+        <td>${BS.dateFR(p.created_at)}</td>
+        <td>${annonces.filter(a => a.vendeur_id === p.id).length}</td><td>${p.credits || 0}</td>
+        <td><span class="st ${p.statut}">${p.statut === "actif" ? "Actif" : "Banni"}</span></td>
+        <td><div class="acts">
+          <button class="btn btn-ghost btn-sm" data-voir="${p.id}">Consulter</button>
+          ${peutGerer(p) || p.id === admin.id ? `<button class="btn btn-ghost btn-sm" data-edituser="${p.id}">Modifier</button>` : ""}
+          ${principal() && p.role === "membre" && p.statut === "actif" && profils.filter(BS.estCoAdmin).length < maxCo ? `<button class="btn btn-ok btn-sm" data-promouvoir="${p.id}">🛡️ Promouvoir modérateur</button>` : ""}
+          ${principal() && BS.estCoAdmin(p) ? `<button class="btn btn-warn btn-sm" data-retirer="${p.id}">Retirer modérateur</button>` : ""}
+          ${peutGerer(p) && p.role !== "administrateur" ? `
+          <button class="btn btn-warn btn-sm" data-bannir="${p.id}">${p.statut === "banni" ? "Réactiver" : "Bannir"}</button>
+          <button class="btn btn-danger btn-sm" data-supuser="${p.id}">Supprimer</button>` : ""}
+        </div></td>
+      </tr>`).join("")
+      : '<tr><td colspan="8" class="empty-row">Aucun utilisateur ne correspond aux filtres.</td></tr>';
+  }
+  function consulter(id) {
+    const p = profil(id); if (!p) return;
+    const ann = annonces.filter(a => a.vendeur_id === p.id);
+    $("#userDetail").innerHTML = `
+      <div class="dl"><b>Nom complet</b> ${BS.esc(BS.nomComplet(p))}</div>
+      <div class="dl"><b>E-mail</b> ${BS.esc(p.email)}</div>
+      <div class="dl"><b>Téléphone</b> ${BS.esc(p.telephone || "—")}</div>
+      <div class="dl"><b>Ville</b> ${BS.esc(p.adresse || "—")}</div>
+      <div class="dl"><b>Rôle</b> ${BS.esc(BS.libelleRole(p))}</div>
+      <div class="dl"><b>Inscription</b> ${BS.dateFR(p.created_at)}</div>
+      <div class="dl"><b>Annonces</b> ${ann.length} (dont ${ann.filter(a => a.statut === "publiee").length} en ligne)</div>
+      <div class="dl"><b>Crédits</b> ${p.credits || 0}</div>
+      <div class="dl"><b>Réputation</b> ${p.reputation || 0} / 5</div>
+      <div class="dl"><b>Messages reçus</b> ${msgs.filter(m => m.vers_id === p.id).length}</div>
+      <div class="dl"><b>Messages envoyés</b> ${msgs.filter(m => m.de_id === p.id).length}</div>
+      <div class="dl"><b>Statut</b> ${p.statut === "actif" ? "Actif" : "Banni"}</div>
+      <div class="dl"><b>Identifiant</b> <code>${BS.esc(p.id)}</code></div>`;
+    BS.ouvrir("mUser");
+  }
+  $("#formUser").addEventListener("submit", async e => {
+    e.preventDefault(); BS.chargement(true);
+    const r = await BS.majProfilAdmin($("#uId").value, {
+      nom: $("#uNom").value, prenom: $("#uPrenom").value, telephone: $("#uTel").value,
+      adresse: $("#uAdr").value, statut: $("#uStatut").disabled ? undefined : $("#uStatut").value,
+      credits: $("#uCredits").value, reputation: $("#uReputation").value
+    });
+    BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgUser", "err", "✖ " + r.message);
+    BS.fermer("mEditUser"); BS.toast("Utilisateur mis à jour"); charger();
+  });
+
+  /* ---------- Équipe d'administration ---------- */
+  function rendreEquipe() {
+    const chef = profils.find(BS.estAdminPrincipal);
+    const cos = profils.filter(BS.estCoAdmin);
+    $("#maxCo").textContent = maxCo;
+    const carte = (p, estChef) => `
+      <div class="membre-equipe ${estChef ? "principal" : ""}">
+        <div>${badgeRole(p)} ${p.id === admin.id ? '<span class="role">Vous</span>' : ""} ${p.statut === "banni" ? '<span class="st banni">Banni</span>' : ""}</div>
+        <div class="nom">${BS.esc(BS.nomComplet(p))}</div>
+        <div class="mail">${BS.esc(p.email)}</div>
+        <div class="mail">Inscrit le ${BS.dateFR(p.created_at)}</div>
+        ${!estChef && principal() ? `<div class="acts">
+          <button class="btn btn-warn btn-sm" data-retirer="${p.id}">Retirer le rôle</button>
+          <button class="btn btn-ghost btn-sm" data-transferer="${p.id}">Transférer le rôle principal</button>
+        </div>` : ""}
+      </div>`;
+    const libres = Math.max(0, maxCo - cos.length);
+    $("#listeEquipe").innerHTML =
+      (chef ? carte(chef, true) : '<div class="place-libre">Aucun administrateur principal.</div>') +
+      cos.map(p => carte(p, false)).join("") +
+      Array.from({ length: libres }, () =>
+        `<div class="place-libre">Place de modérateur libre${principal() ? "<br>↓ Nommez-le ci-dessous" : ""}</div>`).join("");
+
+    const candidats = profils.filter(p => p.role === "membre" && p.statut === "actif");
+    $("#carteNommer").hidden = !principal();
+    if (!principal()) {
+      BS.alerte("msgEquipe", "ok", "Vous êtes modérateur : seul " + BS.nomComplet(chef) + " (administrateur principal) peut modifier l'équipe.");
+      return;
+    }
+    BS.nettoyerAlerte("msgEquipe");
+    const plein = libres === 0;
+    $("#texteNommer").textContent = plein
+      ? "La limite de " + maxCo + " modérateur(s) est atteinte. Retirez d'abord le rôle du modérateur actuel."
+      : "Choisissez un membre actif. Il obtiendra immédiatement l'accès au panneau d'administration.";
+    $("#choixCoAdmin").innerHTML = candidats.length
+      ? candidats.map(p => `<option value="${p.id}">${BS.esc(BS.nomComplet(p))} — ${BS.esc(p.email)}</option>`).join("")
+      : "<option value=''>Aucun membre actif disponible</option>";
+    $("#choixCoAdmin").disabled = $("#btnNommer").disabled = plein || !candidats.length;
+  }
+  $("#btnNommer").onclick = async () => {
+    const p = profil($("#choixCoAdmin").value); if (!p) return;
+    if (!confirm(`Promouvoir ${BS.nomComplet(p)} en modérateur ?\n\nIl pourra gérer les utilisateurs, modérer les annonces et traiter les signalements avec vous.`)) return;
+    BS.chargement(true); const r = await BS.nommerCoAdministrateur(p.id); BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgEquipe", "err", "✖ " + r.message);
+    BS.toast(BS.nomComplet(p) + " est maintenant modérateur"); charger();
+  };
+
+  /* ---------- Annonces ---------- */
+  function rendreAnnonces() {
+    const q = $("#fA").value.toLowerCase().trim(), s = $("#fAS").value;
+    const res = annonces.filter(a =>
+      (!q || a.titre.toLowerCase().includes(q) || (a.vendeur_nom || "").toLowerCase().includes(q)) &&
+      (!s || a.statut === s));
+    $("#tblAnn").innerHTML = res.length ? res.map(a => `
+      <tr>
+        <td>${a.id}</td>
+        <td><div class="livre-cell">${BS.couverture(a, "thumb")}<div><b>${BS.esc(a.titre)}</b>
+          <span class="maj">${BS.imagesAnnonce(a).length} photo(s)${a.updated_at ? " · modifiée le " + BS.dateFR(a.updated_at) : ""}</span></div></div></td>
+        <td>${BS.esc(a.auteur)}</td>
+        <td>${BS.esc(a.vendeur_nom || "—")}</td><td>${BS.esc(a.categorie)}</td>
+        <td>${BS.prix(a.prix)}</td><td>${a.vues || 0}</td>
+        <td><span class="st ${a.statut}">${libelleA(a.statut)}</span></td>
+        <td><div class="acts">
+          <button class="btn btn-ghost btn-sm" data-editann="${a.id}">Modifier</button>
+          ${a.statut === "archivee"
+            ? `<button class="btn btn-ok btn-sm" data-republier="${a.id}">Republier</button>`
+            : `<button class="btn btn-warn btn-sm" data-archiver="${a.id}">Archiver</button>`}
+          ${a.statut !== "vendue" ? `<button class="btn btn-ok btn-sm" data-conclure="${a.id}">Conclure</button>` : ""}
+          <button class="btn btn-danger btn-sm" data-supann="${a.id}">Supprimer</button>
+        </div></td>
+      </tr>`).join("")
+      : '<tr><td colspan="9" class="empty-row">Aucune annonce dans le catalogue.</td></tr>';
+  }
+  function optionsVendeurs(sel) {
+    $("#anVendeur").innerHTML = profils.map(p =>
+      `<option value="${p.id}" ${p.id === sel ? "selected" : ""}>${BS.esc(BS.nomComplet(p))} — ${BS.esc(p.email)}</option>`).join("");
+  }
+  function optionsCats(sel) {
+    $("#anCat").innerHTML = cats.map(c => `<option ${c.nom === sel ? "selected" : ""}>${BS.esc(c.nom)}</option>`).join("");
+  }
+  const editeur = BS.editeurImages("anImages");
+  function ouvrirAnn(id) {
+    BS.nettoyerAlerte("msgAnn"); $("#formAnn").reset();
+    const a = id ? annonces.find(x => x.id === id) : null;
+    if (id && !a) return BS.toast("Annonce introuvable.");
+    if (a) {
+      $("#titreAnn").textContent = "Modifier l'annonce";
+      $("#anId").value = a.id; optionsVendeurs(a.vendeur_id); optionsCats(a.categorie);
+      $("#anTitre").value = a.titre; $("#anAuteur").value = a.auteur; $("#anIsbn").value = a.isbn || "";
+      $("#anType").value = a.type; $("#anStatut").value = a.statut; $("#anPrix").value = a.prix;
+      $("#anAnnee").value = a.annee || ""; $("#anEtat").value = a.etat; $("#anDesc").value = a.description || "";
+    } else {
+      $("#titreAnn").textContent = "Créer une annonce";
+      $("#anId").value = ""; optionsVendeurs(admin.id); optionsCats(); $("#anStatut").value = "publiee"; $("#anPrix").value = 0;
+    }
+    $("#anPrix").disabled = $("#anType").value === "Don";
+    editeur.charger(a);
+    BS.ouvrir("mEditAnn");
+  }
+  $("#formAnn").addEventListener("submit", async e => {
+    e.preventDefault();
+    const vendeur = profil($("#anVendeur").value);
+    const d = {
+      titre: $("#anTitre").value, auteur: $("#anAuteur").value, isbn: $("#anIsbn").value,
+      categorie: $("#anCat").value, type: $("#anType").value, prix: $("#anPrix").value,
+      annee: $("#anAnnee").value, etat: $("#anEtat").value, description: $("#anDesc").value,
+      statut: $("#anStatut").value, vendeur
+    };
+    const id = $("#anId").value;
+    $("#btnEnregAnn").disabled = true; BS.chargement(true);
+    const r = id ? await BS.majAnnonce(+id, d) : await BS.creerAnnonce(d, vendeur);
+    const idA = id ? +id : r.id;
+    const ri = r.ok ? await BS.enregistrerImages(idA, editeur) : null;
+    BS.chargement(false); $("#btnEnregAnn").disabled = false;
+    if (!r.ok) return BS.alerte("msgAnn", "err", "✖ " + r.message);
+    if (!ri.ok) {
+      $("#anId").value = idA; $("#titreAnn").textContent = "Modifier l'annonce";
+      BS.alerte("msgAnn", "err", "✖ Annonce enregistrée, mais les photos n'ont pas pu l'être : " + ri.message + " — cliquez à nouveau sur Enregistrer.");
+      return charger();
+    }
+    BS.fermer("mEditAnn"); BS.toast(id ? "Annonce mise à jour" : "Annonce créée"); charger();
+  });
+  $("#btnNewAnn").onclick = () => ouvrirAnn();
+  $("#anType").addEventListener("change", () => { $("#anPrix").disabled = $("#anType").value === "Don"; });
+
+  /* ---------- Signalements ---------- */
+  function rendreSigs() {
+    $("#tblSig").innerHTML = sigs.length ? sigs.map(s => `
+      <tr>
+        <td>#${s.id}</td><td><b>${BS.esc(s.titre_annonce)}</b></td><td>${BS.esc(s.motif)}</td>
+        <td style="max-width:220px">${BS.esc(s.description)}</td><td>${BS.esc(s.auteur)}</td>
+        <td>${BS.dateFR(s.created_at)}</td>
+        <td><span class="st ${s.statut}">${s.statut === "traite" ? "Traité" : "En attente"}</span></td>
+        <td><div class="acts">${s.statut === "en_attente" ? `
+          <button class="btn btn-warn btn-sm" data-sig="${s.id}" data-action="archiver">Archiver</button>
+          <button class="btn btn-danger btn-sm" data-sig="${s.id}" data-action="supprimer">Supprimer l'annonce</button>
+          <button class="btn btn-ghost btn-sm" data-sig="${s.id}" data-action="rejeter">Rejeter</button>`
+          : `<span style="color:var(--muted)">${BS.esc(s.action ? "Action : " + s.action : "—")}</span>`}
+          <button class="btn btn-danger btn-sm" data-supsig="${s.id}">Effacer</button>
+        </div></td>
+      </tr>`).join("")
+      : '<tr><td colspan="8" class="empty-row">Aucun signalement reçu.</td></tr>';
+  }
+
+  /* ---------- Messages ---------- */
+  function rendreMessages() {
+    const q = $("#fM").value.toLowerCase().trim();
+    const l = msgs.filter(m => !q || (m.de_nom || "").toLowerCase().includes(q) ||
+      (m.vers_nom || "").toLowerCase().includes(q) || m.contenu.toLowerCase().includes(q));
+    $("#nbMsg").textContent = l.length;
+    $("#tblMsg").innerHTML = l.length ? l.map(m => `
+      <tr>
+        <td>#${m.id}</td><td>${BS.esc(m.de_nom || "—")}</td><td>${BS.esc(m.vers_nom || "—")}</td>
+        <td>${BS.esc(m.titre_annonce || "—")}</td><td style="max-width:280px">${BS.esc(m.contenu)}</td>
+        <td>${BS.dateHeureFR(m.created_at)}</td><td>${m.lu ? "✔" : "—"}</td>
+        <td><button class="btn btn-danger btn-sm" data-supmsg="${m.id}">Supprimer</button></td>
+      </tr>`).join("")
+      : '<tr><td colspan="8" class="empty-row">Aucun message échangé.</td></tr>';
+  }
+
+  /* ---------- Catégories ---------- */
+  function rendreCats() {
+    $("#tblCats").innerHTML = cats.length ? cats.map(c => `
+      <tr><td>${c.id}</td><td><b>${BS.esc(c.nom)}</b></td>
+      <td>${annonces.filter(a => a.categorie === c.nom).length}</td>
+      <td><div class="acts">
+        <button class="btn btn-ghost btn-sm" data-renomcat="${c.id}">Renommer</button>
+        <button class="btn btn-danger btn-sm" data-supcat="${c.id}">Supprimer</button>
+      </div></td></tr>`).join("")
+      : '<tr><td colspan="4" class="empty-row">Aucune catégorie.</td></tr>';
+  }
+  $("#btnAddCat").onclick = async () => {
+    BS.chargement(true); const r = await BS.ajouterCategorie($("#newCat").value); BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgCat", "err", r.message);
+    BS.nettoyerAlerte("msgCat"); $("#newCat").value = ""; BS.toast("Catégorie ajoutée"); charger();
+  };
+
+  /* ---------- Actions déléguées ---------- */
+  document.addEventListener("click", async e => {
+    const f = e.target.closest("[data-fermer]"); if (f) BS.fermer(f.dataset.fermer);
+    const v = e.target.closest("[data-voir]"); if (v) consulter(v.dataset.voir);
+    const ea = e.target.closest("[data-editann]"); if (ea) ouvrirAnn(+ea.dataset.editann);
+
+    const eu = e.target.closest("[data-edituser]");
+    if (eu) {
+      const p = profil(eu.dataset.edituser);
+      BS.nettoyerAlerte("msgUser");
+      $("#uId").value = p.id; $("#uNom").value = p.nom; $("#uPrenom").value = p.prenom || "";
+      $("#uMail").value = p.email; $("#uTel").value = p.telephone || ""; $("#uAdr").value = p.adresse || "";
+      $("#uRole").value = BS.libelleRole(p); $("#uStatut").value = p.statut;
+      $("#uStatut").disabled = p.role === "administrateur";
+      $("#uCredits").value = p.credits || 0; $("#uReputation").value = p.reputation || 0;
+      BS.ouvrir("mEditUser");
+    }
+    const ba = e.target.closest("[data-bannir]");
+    if (ba) {
+      const p = profil(ba.dataset.bannir);
+      const act = p.statut === "banni" ? "réactiver" : "bannir";
+      if (confirm(`Voulez-vous ${act} le compte de ${BS.nomComplet(p)} ?`)) {
+        BS.chargement(true); const r = await BS.basculerBannissement(p.id); BS.chargement(false);
+        BS.toast(r.ok ? (r.statut === "banni" ? "Utilisateur banni — annonces archivées" : "Utilisateur réactivé") : r.message);
+        charger();
+      }
+    }
+    const su = e.target.closest("[data-supuser]");
+    if (su) {
+      const p = profil(su.dataset.supuser);
+      if (confirm(`Supprimer le profil de ${BS.nomComplet(p)} ainsi que ses annonces et messages ?\n\nNote : l'identifiant d'authentification doit être supprimé depuis Supabase → Authentication.`)) {
+        BS.chargement(true); const r = await BS.supprimerProfil(p.id); BS.chargement(false);
+        BS.toast(r.ok ? "Profil supprimé" : r.message); charger();
+      }
+    }
+    const pm = e.target.closest("[data-promouvoir]");
+    if (pm) {
+      const p = profil(pm.dataset.promouvoir);
+      if (confirm(`Promouvoir ${BS.nomComplet(p)} en modérateur ?\n\nIl pourra gérer les utilisateurs, modérer les annonces et traiter les signalements avec vous.`)) {
+        BS.chargement(true); const r = await BS.nommerCoAdministrateur(p.id); BS.chargement(false);
+        if (!r.ok) BS.toast(r.message); else BS.toast(BS.nomComplet(p) + " est maintenant modérateur");
+        charger();
+      }
+    }
+    const rt = e.target.closest("[data-retirer]");
+    if (rt) {
+      const p = profil(rt.dataset.retirer);
+      if (confirm(`Retirer le rôle de modérateur à ${BS.nomComplet(p)} ?\nIl redevient simple membre.`)) {
+        BS.chargement(true); const r = await BS.retirerCoAdministrateur(p.id); BS.chargement(false);
+        if (!r.ok) BS.alerte("msgEquipe", "err", "✖ " + r.message); else BS.toast("Rôle retiré");
+        charger();
+      }
+    }
+    const tf = e.target.closest("[data-transferer]");
+    if (tf) {
+      const p = profil(tf.dataset.transferer);
+      if (confirm(`Transférer le rôle d'administrateur principal à ${BS.nomComplet(p)} ?\n\nVous deviendrez modérateur et ne pourrez plus gérer l'équipe.`)) {
+        BS.chargement(true); const r = await BS.transfererAdminPrincipal(p.id); BS.chargement(false);
+        if (!r.ok) BS.alerte("msgEquipe", "err", "✖ " + r.message); else BS.toast("Rôle principal transféré");
+        charger();
+      }
+    }
+    const ar = e.target.closest("[data-archiver]");
+    if (ar) {
+      const a = annonces.find(x => x.id === +ar.dataset.archiver);
+      if (confirm(`Archiver « ${a.titre} » ?`)) {
+        BS.chargement(true); await BS.changerStatutAnnonce(a.id, "archivee"); BS.chargement(false);
+        BS.toast("Annonce archivée"); charger();
+      }
+    }
+    const re = e.target.closest("[data-republier]");
+    if (re) { BS.chargement(true); await BS.changerStatutAnnonce(+re.dataset.republier, "publiee"); BS.chargement(false); BS.toast("Annonce republiée"); charger(); }
+
+    const cc = e.target.closest("[data-conclure]");
+    if (cc) {
+      const a = annonces.find(x => x.id === +cc.dataset.conclure);
+      if (confirm(`Conclure la transaction pour « ${a.titre} » ?`)) {
+        BS.chargement(true); const r = await BS.conclureAnnonce(a.id); BS.chargement(false);
+        BS.toast(r.ok ? "Transaction enregistrée" : r.message); charger();
+      }
+    }
+    const sa = e.target.closest("[data-supann]");
+    if (sa) {
+      const a = annonces.find(x => x.id === +sa.dataset.supann);
+      if (confirm(`Supprimer définitivement l'annonce « ${a.titre} » ?`)) {
+        BS.chargement(true); const r = await BS.supprimerAnnonce(a.id); BS.chargement(false);
+        BS.toast(r.ok ? "Annonce supprimée" : r.message); charger();
+      }
+    }
+    const sg = e.target.closest("[data-sig]");
+    if (sg) {
+      const s = sigs.find(x => x.id === +sg.dataset.sig), action = sg.dataset.action;
+      const txt = { archiver: "archiver l'annonce", supprimer: "supprimer l'annonce", rejeter: "rejeter ce signalement" }[action];
+      if (confirm("Confirmer : " + txt + " ?")) {
+        BS.chargement(true); await BS.traiterSignalement(s, action); BS.chargement(false);
+        BS.toast("Signalement traité"); charger();
+      }
+    }
+    const ss = e.target.closest("[data-supsig]");
+    if (ss && confirm("Effacer ce signalement ?")) {
+      BS.chargement(true); await BS.supprimerSignalement(+ss.dataset.supsig); BS.chargement(false);
+      BS.toast("Signalement effacé"); charger();
+    }
+    const sm = e.target.closest("[data-supmsg]");
+    if (sm && confirm("Supprimer ce message ?")) {
+      BS.chargement(true); await BS.supprimerMessage(+sm.dataset.supmsg); BS.chargement(false);
+      BS.toast("Message supprimé"); charger();
+    }
+    const rc = e.target.closest("[data-renomcat]");
+    if (rc) {
+      const c = cats.find(x => x.id === +rc.dataset.renomcat);
+      const nom = prompt("Nouveau nom de la catégorie :", c.nom);
+      if (nom) {
+        BS.chargement(true); const r = await BS.renommerCategorie(c.id, nom, c.nom); BS.chargement(false);
+        BS.toast(r.ok ? "Catégorie renommée" : r.message); charger();
+      }
+    }
+    const sc = e.target.closest("[data-supcat]");
+    if (sc && confirm("Supprimer cette catégorie ?")) {
+      BS.chargement(true); await BS.supprimerCategorie(+sc.dataset.supcat); BS.chargement(false);
+      BS.toast("Catégorie supprimée"); charger();
+    }
+  });
+  ["#fU", "#fUR", "#fUS"].forEach(s => $(s).addEventListener("input", rendreUsers));
+  ["#fA", "#fAS"].forEach(s => $(s).addEventListener("input", rendreAnnonces));
+  $("#fM").addEventListener("input", rendreMessages);
+  $("#btnDeco").onclick = async () => {
+    if (confirm("Se déconnecter ?")) { await BS.deconnecter(); location.href = "connexion.html?deconnexion=1"; }
+  };
+
+  BS.brancherModales();
+  maxCo = await BS.maxCoAdministrateurs();
+  await charger();
+
+  /* Lien « Modifier » depuis le catalogue public : administrateur.html?modifier=ID */
+  const aModifier = +new URLSearchParams(location.search).get("modifier");
+  if (aModifier) {
+    history.replaceState(null, "", location.pathname);
+    go("annonces"); ouvrirAnn(aModifier);
+  }
+});
+</script>
+</body>
+</html>

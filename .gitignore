@@ -1,0 +1,10 @@
+# Dépendances et artefacts
+node_modules/
+.vercel/
+.DS_Store
+Thumbs.db
+*.log
+
+# Sauvegardes locales
+*.bak
+*~

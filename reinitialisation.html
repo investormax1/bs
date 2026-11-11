@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BookSwap — définir un nouveau mot de passe.">
+<meta name="theme-color" content="#16255a">
+<title>BookSwap — Nouveau mot de passe</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="auth">
+
+<!-- Page ouverte depuis le lien reçu par e-mail (Supabase Auth recovery) -->
+<div class="auth-wrap">
+  <div class="auth-logo">📖 Book<span>Swap</span></div>
+  <div class="auth-card">
+    <h1>Choisir un nouveau mot de passe</h1>
+    <div class="msg" id="msgReinit"></div>
+    <div id="zoneForm">
+      <form id="formReinit" novalidate>
+        <div class="field"><label for="rPass">Nouveau mot de passe *</label>
+          <div class="input-icon"><span class="ic">🔒</span>
+            <input id="rPass" type="password" placeholder="6 caractères minimum" required></div></div>
+        <div class="field"><label for="rPass2">Confirmation *</label>
+          <div class="input-icon"><span class="ic">🔒</span>
+            <input id="rPass2" type="password" placeholder="••••••••" required></div></div>
+        <button class="btn btn-primary btn-block" type="submit">Enregistrer le mot de passe</button>
+      </form>
+    </div>
+    <div class="auth-sep">ou</div>
+    <p class="auth-alt"><a href="connexion.html">Retour à la connexion</a></p>
+  </div>
+  <p class="auth-legal"><a href="index.html">← Retour au catalogue</a></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+"use strict";
+document.addEventListener("DOMContentLoaded", async () => {
+  const $ = s => document.querySelector(s);
+  if (!BS.verifierConfig()) return;
+
+  /* Le lien de récupération ouvre une session temporaire :
+     detectSessionInUrl la récupère automatiquement. */
+  let pret = false;
+  BS.SB.auth.onAuthStateChange((evt) => { if (evt === "PASSWORD_RECOVERY" || evt === "SIGNED_IN") pret = true; });
+
+  const { data } = await BS.SB.auth.getSession();
+  pret = pret || !!(data && data.session);
+  if (!pret) {
+    $("#zoneForm").innerHTML = `<div class="note">Lien invalide ou expiré.
+      Demandez un nouveau lien depuis la page de connexion → « Mot de passe oublié ? ».</div>`;
+    return;
+  }
+
+  $("#formReinit").addEventListener("submit", async e => {
+    e.preventDefault(); BS.chargement(true);
+    const r = await BS.definirNouveauMotDePasse($("#rPass").value, $("#rPass2").value);
+    BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgReinit", "err", "✖ " + r.message);
+    BS.alerte("msgReinit", "ok", "✔ " + r.message);
+    await BS.deconnecter();
+    setTimeout(() => location.href = "connexion.html?motdepasse=1", 1400);
+  });
+});
+</script>
+</body>
+</html>

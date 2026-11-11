@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BookSwap — créez votre compte membre pour publier vos annonces de livres.">
+<meta name="theme-color" content="#16255a">
+<title>BookSwap — Créer un compte</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="auth">
+
+<div class="auth-wrap large">
+  <div class="auth-logo">📖 Book<span>Swap</span></div>
+
+  <div class="auth-card large">
+    <h1>Créer votre compte membre</h1>
+    <div id="banniereSession"></div>
+    <div class="msg" id="msgIns"></div>
+
+    <form id="formInscription" novalidate>
+      <div class="row">
+        <div class="field"><label for="iNom">Nom *</label><input id="iNom" required></div>
+        <div class="field"><label for="iPrenom">Prénom *</label><input id="iPrenom" required></div>
+      </div>
+      <div class="field">
+        <label for="iMail">Adresse E-mail *</label>
+        <div class="input-icon"><span class="ic">✉</span>
+          <input id="iMail" type="email" placeholder="votre.adresse@mail.com" required></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="iTel">Téléphone</label><input id="iTel" type="tel" placeholder="+216 …"></div>
+        <div class="field"><label for="iAdr">Ville</label><input id="iAdr"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="iPass">Mot de passe *</label>
+          <div class="input-icon"><span class="ic">🔒</span>
+            <input id="iPass" type="password" placeholder="6 caractères minimum" required></div></div>
+        <div class="field"><label for="iPass2">Confirmation *</label>
+          <div class="input-icon"><span class="ic">🔒</span>
+            <input id="iPass2" type="password" placeholder="••••••••" required></div></div>
+      </div>
+      <div class="auth-row">
+        <label><input type="checkbox" id="iCgu"> J'accepte les conditions d'utilisation</label>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">S'inscrire</button>
+    </form>
+
+    <div class="auth-sep">ou</div>
+    <p class="auth-alt">Vous avez déjà un compte ? <a href="connexion.html">Se connecter</a></p>
+  </div>
+
+  <p class="auth-legal"><a href="index.html">← Retour au catalogue</a></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+"use strict";
+document.addEventListener("DOMContentLoaded", async () => {
+  const $ = s => document.querySelector(s);
+  if (!BS.verifierConfig()) return;
+
+  const deja = await BS.profil(true);
+  if (deja) {
+    $("#banniereSession").innerHTML =
+      `<div class="banniere">Connecté en tant que <b>${BS.esc(BS.nomComplet(deja))}</b>
+        <a class="btn btn-primary btn-sm" href="${BS.destination(deja)}">Mon espace</a>
+        <button class="btn btn-ghost btn-sm" id="btnDeco">Se déconnecter</button></div>`;
+    $("#btnDeco").onclick = async () => { await BS.deconnecter(); location.reload(); };
+  }
+
+  $("#formInscription").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!$("#iCgu").checked) return BS.alerte("msgIns", "err", "✖ Vous devez accepter les conditions d'utilisation.");
+    BS.chargement(true);
+    const r = await BS.inscrire({
+      nom: $("#iNom").value, prenom: $("#iPrenom").value, email: $("#iMail").value,
+      telephone: $("#iTel").value, adresse: $("#iAdr").value,
+      motDePasse: $("#iPass").value, confirmation: $("#iPass2").value
+    });
+    BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgIns", "err", "✖ " + r.message);
+    BS.alerte("msgIns", "ok", "✔ " + r.message);
+    if (!r.confirmationRequise) setTimeout(() => location.href = "connexion.html?inscrit=1", 1500);
+  });
+});
+</script>
+</body>
+</html>

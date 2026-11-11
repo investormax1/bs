@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BookSwap — achetez, vendez et échangez vos livres. Catalogue public, recherche par titre, auteur ou ISBN.">
+<meta name="theme-color" content="#16255a">
+<title>BookSwap — Achetez, vendez et échangez vos livres</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ==================== EN-TETE ==================== -->
+<header class="topbar">
+  <div class="logo">📖 Book<span>Swap</span></div>
+  <nav class="main-nav">
+    <a class="active" href="index.html">Accueil</a>
+    <a href="#catalogue">Catalogue</a>
+    <a href="#rech">Rechercher</a>
+    <a href="#espaces">Espaces</a>
+  </nav>
+  <div class="auth-btns" id="zoneAuth"></div>
+</header>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+  <h1>BookSwap</h1>
+  <p>Site web dédié à l'échange et à la vente de livres</p>
+</section>
+
+<!-- ==================== RECHERCHE ==================== -->
+<div class="search-zone">
+  <input id="rech" type="search" placeholder="🔍 Rechercher par titre, auteur ou ISBN…" autocomplete="off">
+  <select id="fCat"><option value="">Toutes les catégories</option></select>
+  <select id="fType">
+    <option value="">Tous les types</option>
+    <option>Vente</option><option>Don</option><option>Échange</option>
+  </select>
+  <select id="fEtat" aria-label="État du livre">
+    <option value="">Tous les états</option>
+    <option>Comme neuf</option><option>Bon état</option><option>Correct</option><option>Usé</option>
+  </select>
+  <select id="fVille" aria-label="Zone géographique"><option value="">Toutes les villes</option></select>
+  <button class="btn btn-primary" id="btnRech">Rechercher</button>
+</div>
+
+<!-- ==================== CATALOGUE ==================== -->
+<div class="wrap">
+  <h2 class="section-title" id="catalogue">Livres disponibles (<span id="nb">0</span>)</h2>
+  <div class="grid" id="grille"></div>
+</div>
+
+<!-- ==================== DETAILS ==================== -->
+<div class="overlay" id="mDetails">
+  <div class="modal wide">
+    <span class="close-x" data-fermer="mDetails">✕</span>
+    <h2>Détails du livre</h2>
+    <p class="sub">Fiche complète de l'annonce</p>
+    <div id="detailContent"></div>
+    <div id="detailNote"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-fermer="mDetails">Fermer</button>
+      <button class="btn btn-ghost" id="btnFavDetail">♡ Favori</button>
+      <a class="btn btn-ok" id="btnModifierDetail" hidden>✏️ Modifier mon annonce</a>
+      <button class="btn btn-danger" id="btnSignalerDetail">⚠ Signaler</button>
+      <button class="btn btn-primary" id="btnContactDetail">✉ Contacter le vendeur</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SIGNALER ==================== -->
+<div class="overlay" id="mSignaler">
+  <div class="modal">
+    <span class="close-x" data-fermer="mSignaler">✕</span>
+    <h2>Signaler une annonce</h2>
+    <p class="sub">Votre signalement sera transmis à l'administrateur</p>
+    <div class="msg" id="msgSig"></div>
+    <div class="field"><label for="sigLivre">Livre concerné</label><input id="sigLivre" readonly></div>
+    <div class="field"><label for="sigMotif">Motif</label>
+      <select id="sigMotif">
+        <option>Contenu inapproprié</option><option>Annonce frauduleuse</option>
+        <option>Prix abusif</option><option>Livre contrefait</option><option>Autre</option>
+      </select>
+    </div>
+    <div class="field"><label for="sigDesc">Description *</label><textarea id="sigDesc" rows="3"></textarea></div>
+    <div class="field"><label for="sigMail">Votre e-mail (facultatif)</label><input id="sigMail" type="email"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-fermer="mSignaler">Annuler</button>
+      <button class="btn btn-primary" id="btnEnvoyerSig">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CONTACTER LE VENDEUR ==================== -->
+<div class="overlay" id="mContact">
+  <div class="modal">
+    <span class="close-x" data-fermer="mContact">✕</span>
+    <h2>Contacter le vendeur</h2>
+    <p class="sub">Le message est déposé dans la messagerie du vendeur</p>
+    <div class="msg" id="msgCont"></div>
+    <div class="field"><label for="ctDest">Destinataire</label><input id="ctDest" readonly></div>
+    <div class="field"><label for="ctAnn">Annonce concernée</label><input id="ctAnn" readonly></div>
+    <div class="field"><label for="ctMsg">Votre message *</label><textarea id="ctMsg" rows="4" placeholder="Bonjour, votre livre est-il toujours disponible ?"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-fermer="mContact">Annuler</button>
+      <button class="btn btn-primary" id="btnEnvoyerContact">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== AUTHENTIFICATION (3 onglets) ==================== -->
+<div class="overlay" id="mAuth">
+  <div class="modal">
+    <span class="close-x" data-fermer="mAuth">✕</span>
+    <div class="auth-logo" style="font-size:20px;margin-bottom:14px">📖 Book<span>Swap</span></div>
+    <div class="tabs">
+      <button class="tab active" data-onglet="con">Connexion</button>
+      <button class="tab" data-onglet="ins">Inscription</button>
+      <button class="tab" data-onglet="oub">Mot de passe oublié</button>
+    </div>
+
+    <div class="onglet active" id="ong-con">
+      <div class="msg" id="msgCon"></div>
+      <form id="fCon" novalidate>
+        <div class="field"><label for="acMail">Adresse e-mail</label><input id="acMail" type="email" autocomplete="username"></div>
+        <div class="field"><label for="acPass">Mot de passe</label><input id="acPass" type="password" autocomplete="current-password"></div>
+        <button class="btn btn-primary btn-block" type="submit">Se connecter</button>
+      </form>
+      <p class="auth-alt" style="margin-top:12px"><a href="connexion.html">Page de connexion complète →</a></p>
+    </div>
+
+    <div class="onglet" id="ong-ins">
+      <div class="msg" id="msgIns"></div>
+      <form id="fIns" novalidate>
+        <div class="row">
+          <div class="field"><label for="aiNom">Nom *</label><input id="aiNom"></div>
+          <div class="field"><label for="aiPrenom">Prénom *</label><input id="aiPrenom"></div>
+        </div>
+        <div class="field"><label for="aiMail">Adresse e-mail *</label><input id="aiMail" type="email"></div>
+        <div class="row">
+          <div class="field"><label for="aiTel">Téléphone</label><input id="aiTel" type="tel"></div>
+          <div class="field"><label for="aiAdr">Ville</label><input id="aiAdr"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="aiPass">Mot de passe *</label><input id="aiPass" type="password"></div>
+          <div class="field"><label for="aiPass2">Confirmation *</label><input id="aiPass2" type="password"></div>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Créer mon compte</button>
+      </form>
+    </div>
+
+    <div class="onglet" id="ong-oub">
+      <div class="msg" id="msgOub"></div>
+      <p class="sub">Vous recevrez un lien par e-mail pour définir un nouveau mot de passe.</p>
+      <form id="fOub" novalidate>
+        <div class="field"><label for="aoMail">Adresse e-mail du compte</label><input id="aoMail" type="email"></div>
+        <button class="btn btn-primary btn-block" type="submit">Envoyer le lien</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- ==================== NOS ESPACES ==================== -->
+<section class="espaces-zone" id="espaces">
+  <h2 class="section-title">Nos espaces</h2>
+  <p class="section-sub">Trois profils, trois usages : chacun accède aux fonctions qui le concernent.
+     Le catalogue reste ouvert à tous ; publier, échanger ou modérer demande un compte.</p>
+
+  <div class="espaces">
+
+    <article class="espace visiteur">
+      <div class="espace-ic">🔍</div>
+      <h3>Visiteur</h3>
+      <span class="role">Accès libre, sans compte</span>
+      <p>Parcourez librement les livres proposés à la vente, au don ou à l'échange.</p>
+      <ul class="espace-liste">
+        <li>Consulter les livres</li>
+        <li>Rechercher par titre, auteur ou ISBN</li>
+        <li>Voir la fiche détaillée</li>
+        <li>Signaler une annonce douteuse</li>
+      </ul>
+      <a class="btn btn-ghost" href="#catalogue">Parcourir le catalogue</a>
+    </article>
+
+    <article class="espace membre">
+      <div class="espace-ic">👤</div>
+      <h3>Membre</h3>
+      <span class="role">Compte gratuit</span>
+      <p>Votre tableau de bord personnel : vos annonces, vos échanges et votre messagerie.</p>
+      <ul class="espace-liste">
+        <li>Publier une annonce avec jusqu'à 4 photos</li>
+        <li>Modifier ses annonces à tout moment après publication</li>
+        <li>Favoris, réservation et notation des vendeurs</li>
+        <li>Contacter un vendeur</li>
+        <li>Suivre ses échanges et transactions</li>
+        <li>Gérer son profil et son mot de passe</li>
+      </ul>
+      <a class="btn btn-primary" href="connexion.html?espace=membre" id="lienEspaceMembre">Se connecter à mon espace</a>
+    </article>
+
+    <article class="espace admin">
+      <div class="espace-ic">🛡️</div>
+      <h3>Administrateur</h3>
+      <span class="role">Responsable technique et modérateur</span>
+      <p>Le tableau de bord de supervision : communauté, catalogue et modération.</p>
+      <ul class="espace-liste">
+        <li>Un administrateur principal, épaulé d'un co-administrateur</li>
+        <li>Gérer les utilisateurs et leurs comptes</li>
+        <li>Modérer, archiver ou supprimer les annonces</li>
+        <li>Traiter les signalements reçus</li>
+        <li>Superviser les messages et les catégories</li>
+      </ul>
+      <a class="btn btn-ghost" href="connexion.html?espace=admin" id="lienEspaceAdmin">Se connecter à l'administration</a>
+    </article>
+
+  </div>
+
+  <div class="banniere" style="margin-top:22px;justify-content:center;text-align:center">
+    Pas encore inscrit ? La création de compte est gratuite et immédiate.
+    <a class="btn btn-primary btn-sm" href="inscription.html">S'inscrire</a>
+    <a class="btn btn-ghost btn-sm" href="connexion.html">Se connecter</a>
+  </div>
+</section>
+
+<footer>
+  BookSwap © 2026 — Site web dédié à l'échange et à la vente de livres<br>
+  <a href="index.html">Catalogue</a> · <a href="connexion.html">Connexion</a> ·
+  <a href="inscription.html">Inscription</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+"use strict";
+document.addEventListener("DOMContentLoaded", async () => {
+  const $ = s => document.querySelector(s);
+  if (!BS.verifierConfig()) return;
+  let courante = null, moi = null;
+
+  /* ---------- En-tête ---------- */
+  async function majEnTete() {
+    moi = await BS.profil(true);
+    const z = $("#zoneAuth");
+    if (moi) {
+      z.innerHTML = `<span class="user-chip"><span class="av">${BS.esc(BS.initiales(moi))}</span>${BS.esc(BS.nomComplet(moi))}</span>
+        <a class="btn btn-primary" href="${BS.destination(moi)}">Mon espace</a>
+        <button class="btn btn-outline" id="btnDeco">Déconnexion</button>`;
+      $("#btnDeco").onclick = async () => { await BS.deconnecter(); location.reload(); };
+    } else {
+      z.innerHTML = `<button class="btn btn-outline" id="btnCon">Se connecter</button>
+        <button class="btn btn-primary" id="btnIns">S'inscrire</button>`;
+      $("#btnCon").onclick = () => onglet("con", true);
+      $("#btnIns").onclick = () => onglet("ins", true);
+    }
+  }
+
+  /* ---------- Catalogue ---------- */
+  /* Favoris du membre connecté (♥) */
+  let favoris = new Set();
+  async function majFavoris() { favoris = moi ? await BS.mesFavorisIds() : new Set(); }
+  const coeur = id => favoris.has(id) ? "♥" : "♡";
+  async function basculerFav(id) {
+    if (!moi) {
+      BS.toast("Connectez-vous pour ajouter ce livre à vos favoris.");
+      return onglet("con", true);
+    }
+    const r = await BS.basculerFavori(id, favoris.has(id));
+    if (!r.ok) return BS.toast(r.message);
+    r.favori ? favoris.add(id) : favoris.delete(id);
+    document.querySelectorAll(`[data-fav="${id}"]`).forEach(b => { b.textContent = coeur(id); b.classList.toggle("on", r.favori); });
+    if (courante && courante.id === id) majBoutonFav();
+    BS.toast(r.favori ? "Ajouté à vos favoris" : "Retiré de vos favoris");
+  }
+  function majBoutonFav() {
+    const on = favoris.has(courante.id);
+    $("#btnFavDetail").textContent = on ? "♥ Dans mes favoris" : "♡ Ajouter aux favoris";
+    $("#btnFavDetail").classList.toggle("on", on);
+  }
+  async function majVilles() {
+    const v = $("#fVille").value, villes = await BS.villesCatalogue();
+    $("#fVille").innerHTML = '<option value="">Toutes les villes</option>' +
+      villes.map(x => `<option ${x === v ? "selected" : ""}>${BS.esc(x)}</option>`).join("");
+  }
+
+  async function majCategories() {
+    const c = await BS.categories();
+    $("#fCat").innerHTML = '<option value="">Toutes les catégories</option>' +
+      c.map(x => `<option>${BS.esc(x.nom)}</option>`).join("");
+  }
+  let minuteur = null;
+  function differer() { clearTimeout(minuteur); minuteur = setTimeout(afficher, 280); }
+
+  async function afficher() {
+    BS.chargement(true);
+    const res = await BS.catalogue($("#rech").value, $("#fCat").value, $("#fType").value, $("#fEtat").value, $("#fVille").value);
+    BS.chargement(false);
+    $("#nb").textContent = res.length;
+    const g = $("#grille");
+    if (!res.length) {
+      g.innerHTML = `<div class="empty"><span class="big">📚</span>
+        Aucun livre ne correspond à ces critères. Essayez d'élargir la recherche.</div>`;
+      return;
+    }
+    g.innerHTML = res.map(a => `
+      <article class="book-card">
+        <div class="cover-zone">
+          ${BS.couverture(a, "cover")}
+          ${a.statut === "reservee" ? '<span class="ruban">Réservé</span>' : ""}
+          <button type="button" class="fav ${favoris.has(a.id) ? "on" : ""}" data-fav="${a.id}"
+            title="Favori" aria-label="Ajouter aux favoris">${coeur(a.id)}</button>
+        </div>
+        <div class="book-body">
+          <span class="tag">${BS.esc(a.categorie)} · ${BS.esc(a.type)} · ${BS.esc(a.etat)}</span>
+          <h3>${BS.esc(a.titre)}</h3>
+          <div class="author">${BS.esc(a.auteur)}</div>
+          <div class="meta">👤 ${BS.esc(a.vendeur_nom || "Membre")}${a.vendeur_ville ? " · 📍 " + BS.esc(a.vendeur_ville) : ""}</div>
+          <div class="price">${BS.prix(a.prix)}</div>
+        </div>
+        <div class="book-actions">
+          <button class="btn btn-ghost btn-sm" data-details="${a.id}">Voir détails</button>
+          <button class="btn btn-danger btn-sm" data-signaler="${a.id}" title="Signaler">⚠</button>
+        </div>
+      </article>`).join("");
+    g._cache = res;
+  }
+  const trouver = id => ($("#grille")._cache || []).find(a => a.id === id);
+
+  /* ---------- Détails ---------- */
+  async function details(id) {
+    const a = trouver(id); if (!a) return;
+    courante = a;
+    BS.incrementerVues(id);
+    const imgs = BS.imagesAnnonce(a);
+    const vignettes = imgs.length > 1 ? `<div class="galerie-vignettes">${imgs.map((u, i) =>
+      `<button type="button" class="vignette ${i === 0 ? "active" : ""}" data-gal="${i}" aria-label="Image ${i + 1}">
+         <img src="${BS.esc(u)}" alt="" loading="lazy"></button>`).join("")}</div>` : "";
+    $("#detailContent").innerHTML = `
+      <div class="detail-head">
+        <div class="galerie" id="galerie">${BS.couverture(a, "cover")}${vignettes}</div>
+        <div style="flex:1;min-width:220px">
+          <h3 style="color:var(--navy);font-size:20px;margin-bottom:8px">${BS.esc(a.titre)}</h3>
+          <div class="dl"><b>Auteur</b> ${BS.esc(a.auteur)}</div>
+          <div class="dl"><b>ISBN</b> ${BS.esc(a.isbn || "—")}</div>
+          <div class="dl"><b>Année</b> ${a.annee || "—"}</div>
+          <div class="dl"><b>Catégorie</b> ${BS.esc(a.categorie)}</div>
+          <div class="dl"><b>Type</b> ${BS.esc(a.type)}</div>
+          <div class="dl"><b>État</b> ${BS.esc(a.etat)}</div>
+          <div class="dl"><b>Prix</b> <span style="color:var(--navy2);font-weight:700">${BS.prix(a.prix)}</span></div>
+        </div>
+      </div>
+      ${a.statut === "reservee" ? '<div class="note">📌 Ce livre est <b>réservé</b> : une transaction est en cours avec un autre membre.</div>' : ""}
+      <div class="dl"><b>Vendeur</b> ${BS.esc(a.vendeur_nom || "Membre")}${a.vendeur_ville ? " — " + BS.esc(a.vendeur_ville) : ""}</div>
+      <div class="dl"><b>Réputation</b> <span id="noteVendeur">…</span></div>
+      <div class="dl"><b>Publiée le</b> ${BS.dateFR(a.created_at)} · ${a.vues} vue(s)</div>
+      ${a.updated_at ? `<div class="dl"><b>Modifiée le</b> ${BS.dateHeureFR(a.updated_at)}</div>` : ""}
+      ${a.description ? `<p style="margin-top:10px;font-size:14px;white-space:pre-wrap"><b>Description :</b> ${BS.esc(a.description)}</p>` : ""}
+      <div id="avisVendeur"></div>`;
+    majBoutonFav();
+    /* Note du vendeur (système de notation) — chargée sans bloquer l'ouverture */
+    Promise.all([BS.avisVendeur(a.vendeur_id), BS.evaluationsVendeur(a.vendeur_id, 3)]).then(([n, l]) => {
+      if (!courante || courante.id !== a.id) return;
+      $("#noteVendeur").innerHTML = n.nombre
+        ? `<span class="etoiles">${BS.etoiles(n.moyenne)}</span> ${String(n.moyenne).replace(".", ",")} / 5 · ${n.nombre} avis`
+        : "<span style='color:var(--muted)'>Pas encore d'avis</span>";
+      $("#avisVendeur").innerHTML = l.length ? `<div class="avis-liste"><b>Derniers avis sur ce vendeur</b>` +
+        l.map(e => `<div class="avis"><span class="etoiles">${BS.etoiles(e.note)}</span>
+          <small>${BS.esc(e.acheteur_nom || "Membre")} · ${BS.dateFR(e.created_at)}</small>
+          ${e.commentaire ? `<p>${BS.esc(e.commentaire)}</p>` : ""}</div>`).join("") + "</div>" : "";
+    });
+
+    /* Propriétaire (ou administrateur) : modification directe après publication */
+    const estAdmin = moi && moi.role === "administrateur";
+    const proprio = moi && moi.id === a.vendeur_id;
+    const bm = $("#btnModifierDetail");
+    bm.hidden = !(proprio || estAdmin);
+    bm.href = (estAdmin ? "administrateur.html" : "membre.html") + "?modifier=" + a.id;
+    $("#btnContactDetail").hidden = !!proprio;
+    $("#detailNote").innerHTML = moi ? "" :
+      `<div class="note">🔒 Connectez-vous pour contacter le vendeur.</div>`;
+    BS.ouvrir("mDetails");
+  }
+  /* Galerie : vignette → image principale de la fiche ; clic → taille réelle */
+  document.addEventListener("click", e => {
+    const v = e.target.closest("[data-gal]");
+    if (v && courante) {
+      const u = BS.imagesAnnonce(courante)[+v.dataset.gal];
+      const img = document.querySelector("#galerie .cover img");
+      if (img) img.src = u;
+      else document.querySelector("#galerie .cover").insertAdjacentHTML("beforeend", `<img src="${BS.esc(u)}" alt="">`);
+      document.querySelectorAll("#galerie .vignette").forEach(b => b.classList.toggle("active", b === v));
+      return;
+    }
+    const c = e.target.closest("#galerie .cover img");
+    if (c) window.open(c.src, "_blank", "noopener");
+  });
+
+  /* ---------- Signaler ---------- */
+  function ouvrirSignalement(id) {
+    courante = trouver(id); if (!courante) return;
+    BS.nettoyerAlerte("msgSig");
+    $("#sigLivre").value = courante.titre + " — " + courante.auteur;
+    $("#sigDesc").value = ""; $("#sigMail").value = moi ? moi.email : "";
+    BS.ouvrir("mSignaler");
+  }
+  $("#btnEnvoyerSig").onclick = async () => {
+    const r = await BS.signaler(courante, $("#sigMotif").value, $("#sigDesc").value, $("#sigMail").value);
+    if (!r.ok) return BS.alerte("msgSig", "err", "✖ " + r.message);
+    BS.alerte("msgSig", "ok", "✔ Signalement transmis à l'administrateur.");
+    setTimeout(() => { BS.fermer("mSignaler"); BS.toast("Signalement enregistré"); afficher(); }, 1200);
+  };
+
+  /* ---------- Contacter ---------- */
+  function ouvrirContact(a) {
+    if (!moi) { BS.fermer("mDetails"); onglet("con", true); BS.alerte("msgCon", "err", "Connectez-vous pour contacter le vendeur."); return; }
+    if (moi.id === a.vendeur_id) { BS.toast("Cette annonce vous appartient."); return; }
+    BS.nettoyerAlerte("msgCont");
+    $("#ctDest").value = a.vendeur_nom || "Vendeur";
+    $("#ctAnn").value = a.titre; $("#ctMsg").value = "";
+    BS.fermer("mDetails"); BS.ouvrir("mContact");
+  }
+  $("#btnEnvoyerContact").onclick = async () => {
+    const r = await BS.envoyerMessage(courante.vendeur_id, courante, $("#ctMsg").value);
+    if (!r.ok) return BS.alerte("msgCont", "err", "✖ " + r.message);
+    BS.alerte("msgCont", "ok", "✔ Message envoyé au vendeur.");
+    setTimeout(() => { BS.fermer("mContact"); BS.toast("Message envoyé"); }, 1200);
+  };
+
+  /* ---------- Authentification ---------- */
+  function onglet(o, ouvrirModale) {
+    document.querySelectorAll("#mAuth .tab").forEach(b => b.classList.toggle("active", b.dataset.onglet === o));
+    document.querySelectorAll("#mAuth .onglet").forEach(s => s.classList.toggle("active", s.id === "ong-" + o));
+    if (ouvrirModale) BS.ouvrir("mAuth");
+  }
+  document.querySelectorAll("#mAuth [data-onglet]").forEach(b => b.onclick = () => onglet(b.dataset.onglet));
+
+  $("#fCon").addEventListener("submit", async e => {
+    e.preventDefault(); BS.chargement(true);
+    const r = await BS.connecter($("#acMail").value, $("#acPass").value);
+    BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgCon", "err", "✖ " + r.message);
+    BS.alerte("msgCon", "ok", "✔ Connexion réussie — redirection…");
+    setTimeout(() => location.href = r.redirection, 600);
+  });
+  $("#fIns").addEventListener("submit", async e => {
+    e.preventDefault(); BS.chargement(true);
+    const r = await BS.inscrire({
+      nom: $("#aiNom").value, prenom: $("#aiPrenom").value, email: $("#aiMail").value,
+      telephone: $("#aiTel").value, adresse: $("#aiAdr").value,
+      motDePasse: $("#aiPass").value, confirmation: $("#aiPass2").value
+    });
+    BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgIns", "err", "✖ " + r.message);
+    BS.alerte("msgIns", "ok", "✔ " + r.message);
+    $("#acMail").value = $("#aiMail").value;
+    setTimeout(() => { onglet("con"); BS.alerte("msgCon", "ok", r.message); }, 1600);
+  });
+  $("#fOub").addEventListener("submit", async e => {
+    e.preventDefault(); BS.chargement(true);
+    const r = await BS.envoyerLienReinitialisation($("#aoMail").value);
+    BS.chargement(false);
+    BS.alerte("msgOub", r.ok ? "ok" : "err", (r.ok ? "✔ " : "✖ ") + r.message);
+  });
+
+  /* ---------- Délégation ---------- */
+  document.addEventListener("click", e => {
+    const f = e.target.closest("[data-fermer]"); if (f) BS.fermer(f.dataset.fermer);
+    const d = e.target.closest("[data-details]"); if (d) details(+d.dataset.details);
+    const s = e.target.closest("[data-signaler]"); if (s) ouvrirSignalement(+s.dataset.signaler);
+    const fv = e.target.closest("[data-fav]"); if (fv) basculerFav(+fv.dataset.fav);
+  });
+  $("#btnSignalerDetail").onclick = () => { BS.fermer("mDetails"); ouvrirSignalement(courante.id); };
+  $("#btnFavDetail").onclick = () => basculerFav(courante.id);
+  $("#btnContactDetail").onclick = () => ouvrirContact(courante);
+  ["#rech", "#fCat", "#fType", "#fEtat", "#fVille"].forEach(s => $(s).addEventListener("input", differer));
+  $("#btnRech").onclick = afficher;
+
+  /* ---------- Initialisation ---------- */
+  BS.brancherModales();
+  await majEnTete(); await Promise.all([majCategories(), majVilles(), majFavoris()]); await afficher();
+  /* Lien direct vers une fiche (depuis « Mes favoris ») : index.html?annonce=ID */
+  const aOuvrir = +new URLSearchParams(location.search).get("annonce");
+  if (aOuvrir) { history.replaceState(null, "", location.pathname + "#catalogue"); if (trouver(aOuvrir)) details(aOuvrir); else BS.toast("Ce livre n'est plus disponible."); }
+  /* ---------- Mise à jour en temps réel du catalogue ----------
+     Nécessite l'activation de Realtime sur la table « annonces »
+     (Supabase → Database → Replication). Sans cela, rien ne casse. */
+  try {
+    BS.SB.channel("catalogue-public")
+      .on("postgres_changes", { event: "*", schema: "public", table: "annonces" }, () => differer())
+      .subscribe();
+  } catch (e) {}
+
+  const p = new URLSearchParams(location.search);
+  if (p.has("auth")) onglet("con", true);
+  if (p.has("inscription")) onglet("ins", true);
+});
+</script>
+</body>
+</html>

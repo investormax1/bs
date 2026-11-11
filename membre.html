@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BookSwap — espace personnel du membre : annonces, échanges, messages et profil.">
+<meta name="theme-color" content="#16255a">
+<title>BookSwap — Espace Membre</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="app">
+
+<aside class="side">
+  <div class="brand"><div class="t">📖 Book<span>Swap</span></div><div class="r" style="color:#7aa2ff">ESPACE PERSONNEL</div></div>
+  <nav class="menu">
+    <a class="active" data-v="dash">👤 Mon Compte</a>
+    <a data-v="livres">📗 Mes Livres en Vente</a>
+    <a data-v="favoris">❤️ Mes Favoris <span class="badge doux" id="bdgFav" hidden>0</span></a>
+    <a data-v="echanges">🔄 Mes Échanges en Cours</a>
+    <a data-v="histo">🕘 Historique des Transactions</a>
+    <a data-v="messages">✉️ Messages <span class="badge" id="bdgMsg" hidden>0</span></a>
+    <a data-v="params">⚙️ Paramètres du Profil</a>
+    <div class="sep"></div>
+    <a href="index.html">🌐 Catalogue public</a>
+    <a href="connexion.html">🔑 Changer de compte</a>
+    <a id="btnDeco">⏻ Déconnexion</a>
+  </nav>
+  <div class="who" id="who"></div>
+</aside>
+
+<main class="content">
+
+<!-- ============ TABLEAU DE BORD ============ -->
+<section class="view active" id="v-dash">
+  <h1 class="page-title" id="titreDash">Tableau de bord</h1>
+  <div class="top-row">
+    <div class="card profil">
+      <div id="av"></div>
+      <div>
+        <h2 id="bienvenue"></h2>
+        <div class="mail" id="mailProfil"></div>
+        <span class="pill" id="depuis"></span><br>
+        <span class="link-edit" data-goto="params">✏️ Modifier le profil</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Mes Statistiques BookSwap</h3>
+      <div class="stats">
+        <div class="stat"><div class="circle" id="sLivres">0</div><small>Livres en vente</small></div>
+        <div class="stat"><div class="circle" id="sEchanges">0</div><small>Échanges réussis</small></div>
+        <div class="stat"><div class="circle" id="sCredits">0</div><small>Crédits</small></div>
+      </div>
+    </div>
+  </div>
+  <div class="info-row">
+    <div class="card"><h3>Ventes en cours</h3><div id="blocVentes"></div></div>
+    <div class="card"><h3>Échanges actifs</h3><div id="blocEchanges"></div></div>
+    <div class="card"><h3>Derniers messages</h3><div id="blocMessages"></div></div>
+  </div>
+  <div class="card">
+    <div class="head-flex">
+      <h3>Mes livres récemment ajoutés à la vente</h3>
+      <button class="btn btn-primary btn-sm" id="btnPub1">+ Publier une annonce</button>
+    </div>
+    <div class="mini-grid" id="recents"></div>
+  </div>
+</section>
+
+<!-- ============ MES ANNONCES ============ -->
+<section class="view" id="v-livres">
+  <h1 class="page-title">Mes livres en vente</h1>
+  <p class="page-sub">Publier, modifier, réserver, marquer vendu ou supprimer vos annonces</p>
+  <div class="card">
+    <div class="head-flex">
+      <h3>Mes annonces</h3>
+      <div class="filters">
+        <input id="fMes" placeholder="🔍 Filtrer par titre…">
+        <button class="btn btn-primary btn-sm" id="btnPub2">+ Publier une annonce</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Livre</th><th>Auteur</th><th>Catégorie</th><th>Type</th><th>Prix</th><th>Vues</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="tblAnnonces"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAVORIS ============ -->
+<section class="view" id="v-favoris">
+  <h1 class="page-title">Mes favoris</h1>
+  <p class="page-sub">Les livres mis de côté avec ♥ dans le catalogue — ils disparaissent d'ici une fois vendus</p>
+  <div class="card"><div class="fav-grid" id="listeFavoris"></div></div>
+</section>
+
+<!-- ============ ECHANGES ============ -->
+<section class="view" id="v-echanges">
+  <h1 class="page-title">Mes échanges en cours</h1>
+  <p class="page-sub">Annonces actives ayant reçu au moins une demande</p>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Livre</th><th>Type</th><th>Demandes</th><th>Dernier contact</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="tblEchanges"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HISTORIQUE ============ -->
+<section class="view" id="v-histo">
+  <h1 class="page-title">Historique des transactions</h1>
+  <p class="page-sub">Ventes, dons et échanges conclus — et la note laissée par l'acheteur</p>
+  <div class="card">
+    <h3>Mes ventes</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Référence</th><th>Livre</th><th>Type</th><th>Montant</th><th>Acheteur</th><th>Date</th><th>Note reçue</th></tr></thead>
+        <tbody id="tblHisto"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Mes achats</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Référence</th><th>Livre</th><th>Type</th><th>Montant</th><th>Date</th><th>Ma note au vendeur</th></tr></thead>
+        <tbody id="tblAchats"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MESSAGES ============ -->
+<section class="view" id="v-messages">
+  <h1 class="page-title">Messages</h1>
+  <p class="page-sub">Échanges avec les autres membres</p>
+  <div class="card">
+    <div class="head-flex">
+      <h3>Boîte de réception (<span id="nbRecus">0</span>)</h3>
+      <button class="btn btn-ghost btn-sm" id="btnToutLu">Tout marquer comme lu</button>
+    </div>
+    <div class="msg-list" id="listeRecus"></div>
+  </div>
+  <div class="card">
+    <h3>Messages envoyés (<span id="nbEnvoyes">0</span>)</h3>
+    <div class="msg-list" id="listeEnvoyes"></div>
+  </div>
+</section>
+
+<!-- ============ PARAMETRES ============ -->
+<section class="view" id="v-params">
+  <h1 class="page-title">Paramètres du profil</h1>
+  <p class="page-sub">Vos informations personnelles et votre mot de passe</p>
+  <div class="card" style="max-width:660px">
+    <div class="msg" id="msgProfil"></div>
+    <h3>Photo de profil</h3>
+    <div class="photo-profil">
+      <div id="avParams"></div>
+      <div>
+        <button class="btn btn-primary btn-sm" type="button" id="btnPhoto">📷 Changer la photo</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="btnSupprPhoto">Retirer</button>
+        <p class="aide">JPEG, PNG ou WebP — recadrée automatiquement.</p>
+        <input type="file" id="inPhoto" accept="image/jpeg,image/png,image/webp,image/*" hidden>
+      </div>
+    </div>
+    <form id="formProfil" novalidate>
+      <h3 style="margin-top:18px">Informations personnelles</h3>
+      <div class="row">
+        <div class="field"><label for="pNom">Nom *</label><input id="pNom" required></div>
+        <div class="field"><label for="pPrenom">Prénom</label><input id="pPrenom"></div>
+      </div>
+      <div class="field"><label for="pMail">Adresse e-mail</label><input id="pMail" type="email" readonly></div>
+      <div class="row">
+        <div class="field"><label for="pTel">Téléphone</label><input id="pTel" type="tel"></div>
+        <div class="field"><label for="pAdr">Ville</label><input id="pAdr"></div>
+      </div>
+      <h3 style="margin-top:18px">Sécurité</h3>
+      <div class="row">
+        <div class="field"><label for="pPass">Nouveau mot de passe</label><input id="pPass" type="password" placeholder="Laisser vide pour conserver"></div>
+        <div class="field"><label for="pPass2">Confirmation</label><input id="pPass2" type="password"></div>
+      </div>
+      <div class="modal-actions" style="max-width:360px">
+        <button class="btn btn-ghost" type="button" data-goto="dash">Annuler</button>
+        <button class="btn btn-primary" type="submit">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Premier administrateur : visible uniquement tant qu'aucun n'existe -->
+  <div class="card" style="max-width:660px" id="carteAdmin" hidden>
+    <h3>🛡️ Devenir administrateur</h3>
+    <div class="msg" id="msgAdmin"></div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:12px">
+      Aucun administrateur n'est encore désigné sur cette plateforme. En tant que premier
+      inscrit, vous pouvez devenir l'<b>administrateur principal</b> : gestion des utilisateurs,
+      modération des annonces et traitement des signalements.
+    </p>
+    <p style="font-size:13.5px;color:var(--muted);margin-bottom:14px">
+      Cette possibilité disparaît définitivement dès qu'un administrateur existe.
+      L'administrateur principal est unique ; c'est lui qui nomme ensuite un
+      modérateur depuis le panneau d'administration.
+    </p>
+    <button class="btn btn-primary" id="btnDevenirAdmin">Prendre le rôle d'administrateur</button>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ MODALE ANNONCE ============ -->
+<div class="overlay" id="mAnnonce">
+  <div class="modal wide">
+    <span class="close-x" data-fermer="mAnnonce">✕</span>
+    <h2 id="titreModale">Publier une annonce</h2>
+    <p class="sub" id="sousTitreModale">Renseignez les informations du livre</p>
+    <div class="msg" id="msgAnn"></div>
+    <form id="formAnnonce" novalidate>
+      <input type="hidden" id="aId">
+      <div class="field"><label for="aTitre">Titre du livre *</label><input id="aTitre" required></div>
+      <div class="row">
+        <div class="field"><label for="aAuteur">Auteur *</label><input id="aAuteur" required></div>
+        <div class="field"><label for="aIsbn">ISBN</label><input id="aIsbn"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="aCat">Catégorie</label><select id="aCat"></select></div>
+        <div class="field"><label for="aType">Type d'échange</label>
+          <select id="aType"><option>Vente</option><option>Échange</option><option>Don</option></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="aPrix">Prix</label><input id="aPrix" type="number" min="0" step="0.5" value="0"></div>
+        <div class="field"><label for="aAnnee">Année</label><input id="aAnnee" type="number"></div>
+        <div class="field"><label for="aEtat">État</label>
+          <select id="aEtat"><option>Comme neuf</option><option selected>Bon état</option><option>Correct</option><option>Usé</option></select></div>
+      </div>
+      <div class="field"><label for="aDesc">Description</label><textarea id="aDesc" rows="3"></textarea></div>
+      <div class="field">
+        <label>Photos du livre <span class="nb-img">— 1 principale + 3 autres</span></label>
+        <div id="aImages"></div>
+        <p class="aide">Cliquez sur ＋ ou glissez vos photos ici. La première est l'image principale ; ★ pour en choisir une autre, ✕ pour la retirer.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" type="button" data-fermer="mAnnonce">Annuler</button>
+        <button class="btn btn-primary" type="submit" id="btnEnregAnn">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODALE REPONSE ============ -->
+<div class="overlay" id="mRepondre">
+  <div class="modal">
+    <span class="close-x" data-fermer="mRepondre">✕</span>
+    <h2>Répondre</h2>
+    <p class="sub">Votre réponse sera déposée dans la messagerie du membre</p>
+    <div class="msg" id="msgRep"></div>
+    <input type="hidden" id="rVers"><input type="hidden" id="rAnn">
+    <div class="field"><label for="rDest">Destinataire</label><input id="rDest" readonly></div>
+    <div class="field"><label for="rOrigine">Message reçu</label><textarea id="rOrigine" rows="3" readonly></textarea></div>
+    <div class="field"><label for="rMsg">Votre réponse *</label><textarea id="rMsg" rows="4"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-fermer="mRepondre">Annuler</button>
+      <button class="btn btn-primary" id="btnEnvoyerRep">Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODALE CONCLURE (vendu + acheteur) ============ -->
+<div class="overlay" id="mConclure">
+  <div class="modal">
+    <span class="close-x" data-fermer="mConclure">✕</span>
+    <h2>Marquer comme vendu</h2>
+    <p class="sub" id="cTitre"></p>
+    <div class="msg" id="msgConclure"></div>
+    <input type="hidden" id="cId">
+    <div class="field"><label for="cAcheteur">Avec quel membre ?</label>
+      <select id="cAcheteur"></select></div>
+    <p class="aide">Les membres proposés sont ceux qui vous ont écrit au sujet de ce livre.
+       L'acheteur choisi pourra vous noter (1 à 5 ★) depuis son historique.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-fermer="mConclure">Annuler</button>
+      <button class="btn btn-ok" id="btnConclure">✔ Confirmer la vente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODALE NOTER LE VENDEUR ============ -->
+<div class="overlay" id="mNoter">
+  <div class="modal">
+    <span class="close-x" data-fermer="mNoter">✕</span>
+    <h2>Noter le vendeur</h2>
+    <p class="sub" id="nTitre"></p>
+    <div class="msg" id="msgNoter"></div>
+    <input type="hidden" id="nId"><input type="hidden" id="nNote" value="0">
+    <div class="choix-etoiles" id="nEtoiles" role="radiogroup" aria-label="Note de 1 à 5">
+      <button type="button" data-note="1" aria-label="1 étoile">★</button><button type="button" data-note="2" aria-label="2 étoiles">★</button><button type="button" data-note="3" aria-label="3 étoiles">★</button><button type="button" data-note="4" aria-label="4 étoiles">★</button><button type="button" data-note="5" aria-label="5 étoiles">★</button>
+    </div>
+    <div class="field"><label for="nCom">Commentaire (facultatif)</label>
+      <textarea id="nCom" rows="3" maxlength="500" placeholder="Livre conforme, échange rapide…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-fermer="mNoter">Annuler</button>
+      <button class="btn btn-primary" id="btnNoter">Envoyer la note</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+"use strict";
+document.addEventListener("DOMContentLoaded", async () => {
+  const $ = s => document.querySelector(s);
+  const moi = await BS.exigerRole("membre");
+  if (!moi) return;
+
+  let mesAnn = [], recus = [], envoyes = [], transactions = [], cats = [];
+  let favoris = [], achats = [], notesDonnees = [];
+
+  function go(v) {
+    document.querySelectorAll(".view").forEach(s => s.classList.remove("active"));
+    const el = document.getElementById("v-" + v); if (el) el.classList.add("active");
+    document.querySelectorAll(".menu a[data-v]").forEach(a => a.classList.toggle("active", a.dataset.v === v));
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll(".menu a[data-v]").forEach(a => a.onclick = () => go(a.dataset.v));
+  document.addEventListener("click", e => {
+    const g = e.target.closest("[data-goto]"); if (g) go(g.dataset.goto);
+    const f = e.target.closest("[data-fermer]"); if (f) BS.fermer(f.dataset.fermer);
+  });
+
+  const ligne = (g, d) => `<div class="line"><span>${g}</span><b>${d}</b></div>`;
+  const libelle = s => ({ publiee: "En ligne", reservee: "Réservé", vendue: "Vendu", archivee: "Archivée", signalee: "Signalée" }[s] || s);
+
+  /* ---------- Chargement des données ---------- */
+  async function charger() {
+    BS.chargement(true);
+    [mesAnn, recus, envoyes, transactions, cats, favoris, achats, notesDonnees] = await Promise.all([
+      BS.mesAnnonces(), BS.messagesRecus(), BS.messagesEnvoyes(), BS.mesTransactions(), BS.categories(),
+      BS.mesFavoris(), BS.mesAchats(), BS.mesNotesDonnees()
+    ]);
+    BS.chargement(false);
+    rendreDash(); rendreAnnonces(); rendreFavoris(); rendreEchanges(); rendreHisto(); rendreMessages(); remplirProfil();
+  }
+
+  /* ---------- Tableau de bord ---------- */
+  function rendreDash() {
+    const p = moi;
+    $("#titreDash").textContent = "Tableau de bord de " + BS.nomComplet(p);
+    $("#av").innerHTML = BS.avatar(p, "avatar");
+    $("#avParams").innerHTML = BS.avatar(p, "avatar");
+    $("#btnSupprPhoto").hidden = !p.photo;
+    $("#bienvenue").textContent = "Bienvenue, " + BS.nomComplet(p) + " !";
+    $("#mailProfil").textContent = p.email;
+    $("#depuis").textContent = "Membre depuis : " + BS.moisFR(p.created_at);
+    $("#who").innerHTML = `<div class="who-flex">${BS.avatar(p, "avatar mini-av")}<div><b>${BS.esc(BS.nomComplet(p))}</b>${BS.esc(p.email)}</div></div>`;
+
+    const enVente = mesAnn.filter(a => ["publiee", "signalee", "reservee"].includes(a.statut));
+    const vendues = mesAnn.filter(a => a.statut === "vendue");
+    $("#sLivres").textContent = enVente.length;
+    $("#sEchanges").textContent = vendues.length;
+    $("#sCredits").textContent = p.credits || 0;
+
+    const avecDemande = id => recus.some(m => m.annonce_id === id);
+    const ventes = mesAnn.filter(a => a.type === "Vente");
+    const echanges = mesAnn.filter(a => a.type === "Échange" || a.type === "Don");
+
+    $("#blocVentes").innerHTML =
+      ligne("📦 En attente d'envoi", ventes.filter(a => a.statut !== "vendue" && avecDemande(a.id)).length) +
+      ligne("✅ Vendus récemment", ventes.filter(a => a.statut === "vendue").length) +
+      ligne("👁️ Vues cumulées", mesAnn.reduce((s, a) => s + (a.vues || 0), 0));
+    $("#blocEchanges").innerHTML =
+      ligne("💬 En cours de négociation", echanges.filter(a => a.statut !== "vendue" && avecDemande(a.id)).length) +
+      ligne("📬 En attente de réception", echanges.filter(a => a.statut === "vendue").length) +
+      ligne("📦 Annonces archivées", mesAnn.filter(a => a.statut === "archivee").length) +
+      ligne("📌 Réservés", mesAnn.filter(a => a.statut === "reservee").length) +
+      ligne("⭐ Réputation", p.reputation ? `<span class="etoiles">${BS.etoiles(p.reputation)}</span> ${p.reputation} / 5` : "Pas encore d'avis");
+    $("#blocMessages").innerHTML = recus.length
+      ? recus.slice(0, 3).map(m => ligne("Reçu de " + BS.esc(m.de_nom || "Membre"),
+          m.titre_annonce ? "« " + BS.esc(m.titre_annonce) + " »" : "—")).join("")
+      : '<p style="font-size:13.5px;color:var(--muted)">Aucun message reçu.</p>';
+
+    $("#recents").innerHTML = mesAnn.length ? mesAnn.slice(0, 3).map(a => `
+      <div class="mini">
+        ${BS.couverture(a, "cov")}
+        <div>
+          <h4>${BS.esc(a.titre)}</h4><small>${BS.esc(a.auteur)}</small>
+          <div class="p">${BS.prix(a.prix)}</div>
+          <span class="link-edit" data-modif="${a.id}">Modifier</span>
+        </div>
+      </div>`).join("")
+      : '<div class="empty"><span class="big">📗</span>Aucune annonce publiée pour le moment.</div>';
+  }
+
+  /* ---------- Mes annonces ---------- */
+  function rendreAnnonces() {
+    const q = $("#fMes").value.toLowerCase().trim();
+    const l = mesAnn.filter(a => !q || a.titre.toLowerCase().includes(q));
+    $("#tblAnnonces").innerHTML = l.length ? l.map(a => `
+      <tr>
+        <td><div class="livre-cell">${BS.couverture(a, "thumb")}<div><b>${BS.esc(a.titre)}</b>
+          <span class="maj">${BS.imagesAnnonce(a).length} photo(s)${a.updated_at ? " · modifiée le " + BS.dateFR(a.updated_at) : ""}</span></div></div></td>
+        <td>${BS.esc(a.auteur)}</td><td>${BS.esc(a.categorie)}</td>
+        <td>${BS.esc(a.type)}</td><td>${BS.prix(a.prix)}</td><td>${a.vues || 0}</td>
+        <td><span class="st ${a.statut}">${libelle(a.statut)}</span></td>
+        <td><div class="acts">
+          <button class="btn btn-ghost btn-sm" data-modif="${a.id}">Modifier</button>
+          ${a.statut === "publiee" ? `<button class="btn btn-warn btn-sm" data-reserver="${a.id}">Réserver</button>` : ""}
+          ${a.statut === "reservee" ? `<button class="btn btn-ghost btn-sm" data-liberer="${a.id}">Remettre en vente</button>` : ""}
+          ${a.statut !== "vendue" ? `<button class="btn btn-ok btn-sm" data-conclure="${a.id}">Marquer vendu</button>` : ""}
+          <button class="btn btn-danger btn-sm" data-suppr="${a.id}">Supprimer</button>
+        </div></td>
+      </tr>`).join("")
+      : '<tr><td colspan="8" class="empty-row">Aucune annonce. Cliquez sur « Publier une annonce ».</td></tr>';
+  }
+
+  /* ---------- Favoris ---------- */
+  function rendreFavoris() {
+    const b = $("#bdgFav"); b.textContent = favoris.length; b.hidden = !favoris.length;
+    $("#listeFavoris").innerHTML = favoris.length ? favoris.map(a => `
+      <div class="mini">
+        ${BS.couverture(a, "cov")}
+        <div style="flex:1;min-width:0">
+          <h4>${BS.esc(a.titre)}</h4><small>${BS.esc(a.auteur)} · ${BS.esc(a.etat)}</small>
+          <small style="display:block">👤 ${BS.esc(a.vendeur_nom || "Membre")}${a.vendeur_ville ? " · 📍 " + BS.esc(a.vendeur_ville) : ""}</small>
+          <div class="p">${BS.prix(a.prix)} ${a.statut === "reservee" ? '<span class="st reservee">Réservé</span>' : ""}</div>
+          <div class="acts" style="margin-top:6px">
+            <a class="btn btn-ghost btn-sm" href="index.html?annonce=${a.id}">Voir / contacter</a>
+            <button class="btn btn-danger btn-sm" data-retirerfav="${a.id}">Retirer</button>
+          </div>
+        </div>
+      </div>`).join("")
+      : '<div class="empty"><span class="big">❤️</span>Aucun favori. Cliquez sur ♡ sur un livre du catalogue pour le garder ici.</div>';
+  }
+
+  /* ---------- Échanges ---------- */
+  function rendreEchanges() {
+    const l = mesAnn.filter(a => a.statut !== "vendue").map(a => {
+      const d = recus.filter(m => m.annonce_id === a.id);
+      return { a, n: d.length, dernier: d[0] };
+    }).filter(x => x.n > 0);
+    $("#tblEchanges").innerHTML = l.length ? l.map(({ a, n, dernier }) => `
+      <tr>
+        <td><b>${BS.esc(a.titre)}</b></td><td>${BS.esc(a.type)}</td><td>${n}</td>
+        <td>${BS.dateFR(dernier.created_at)} — ${BS.esc(dernier.de_nom || "Membre")}</td>
+        <td><span class="st ${a.statut}">${libelle(a.statut)}</span></td>
+        <td><button class="btn btn-ghost btn-sm" data-repondre="${dernier.id}">Répondre</button></td>
+      </tr>`).join("")
+      : '<tr><td colspan="6" class="empty-row">Aucune demande reçue pour le moment.</td></tr>';
+  }
+
+  /* ---------- Historique ---------- */
+  let notesRecues = [];
+  async function rendreHisto() {
+    const ref = t => "#TR-" + String(t.id).padStart(4, "0");
+    const noteDe = (liste, t) => liste.find(e => e.transaction_id === t.id);
+    const affNote = e => `<span class="etoiles" title="${BS.esc(e.commentaire || "")}">${BS.etoiles(e.note)}</span>`;
+    const remplir = () => {
+      $("#tblHisto").innerHTML = transactions.length ? transactions.map(t => {
+        const e = noteDe(notesRecues, t);
+        return `<tr>
+          <td>${ref(t)}</td><td><b>${BS.esc(t.titre)}</b></td>
+          <td>${BS.esc(t.type)}</td><td>${BS.prix(t.montant)}</td>
+          <td>${BS.esc(t.acheteur_nom || "—")}</td><td>${BS.dateFR(t.created_at)}</td>
+          <td>${e ? affNote(e) + (e.commentaire ? `<span class="maj">« ${BS.esc(e.commentaire)} »</span>` : "")
+                  : t.acheteur_id ? '<span class="maj">En attente</span>' : '<span class="maj">—</span>'}</td>
+        </tr>`;
+      }).join("") : '<tr><td colspan="7" class="empty-row">Aucune vente enregistrée.</td></tr>';
+    };
+    $("#tblAchats").innerHTML = achats.length ? achats.map(t => {
+      const e = noteDe(notesDonnees, t);
+      return `<tr>
+        <td>${ref(t)}</td><td><b>${BS.esc(t.titre)}</b></td>
+        <td>${BS.esc(t.type)}</td><td>${BS.prix(t.montant)}</td><td>${BS.dateFR(t.created_at)}</td>
+        <td>${e ? affNote(e) : `<button class="btn btn-primary btn-sm" data-noter="${t.id}">★ Noter le vendeur</button>`}</td>
+      </tr>`;
+    }).join("") : '<tr><td colspan="6" class="empty-row">Aucun achat. Quand un vendeur vous désigne comme acheteur, la transaction apparaît ici.</td></tr>';
+    remplir();
+    notesRecues = await BS.evaluationsVendeur(moi.id, 1000);
+    remplir();
+  }
+
+  /* ---------- Messages ---------- */
+  const titreBase = document.title;
+  function rendreMessages() {
+    $("#nbRecus").textContent = recus.length;
+    $("#nbEnvoyes").textContent = envoyes.length;
+    $("#listeRecus").innerHTML = recus.length ? recus.map(m => `
+      <div class="msg-item ${m.lu ? "" : "unread"}" data-repondre="${m.id}">
+        <span class="date">${BS.dateFR(m.created_at)}</span>
+        <div class="from">${BS.esc(m.de_nom || "Membre")}${m.titre_annonce ? " — « " + BS.esc(m.titre_annonce) + " »" : ""}</div>
+        <div class="prev">${BS.esc(m.contenu)}</div>
+      </div>`).join("")
+      : '<div class="empty"><span class="big">✉️</span>Votre boîte de réception est vide.</div>';
+    $("#listeEnvoyes").innerHTML = envoyes.length ? envoyes.map(m => `
+      <div class="msg-item">
+        <span class="date">${BS.dateFR(m.created_at)}</span>
+        <div class="from">À ${BS.esc(m.vers_nom || "Membre")}${m.titre_annonce ? " — « " + BS.esc(m.titre_annonce) + " »" : ""}</div>
+        <div class="prev">${BS.esc(m.contenu)}</div>
+      </div>`).join("")
+      : '<div class="empty">Aucun message envoyé.</div>';
+    majBadgeMessages();
+  }
+  function majBadgeMessages() {
+    const n = recus.filter(m => !m.lu).length, b = $("#bdgMsg");
+    b.textContent = n; b.hidden = n === 0;
+    document.title = (n ? "(" + n + ") " : "") + titreBase;
+  }
+  /* Notifications : nouveau message reçu (temps réel, avec relève toutes les 60 s en secours) */
+  async function nouveauxMessages(annonce) {
+    const avant = new Set(recus.map(m => m.id));
+    recus = await BS.messagesRecus();
+    const nouveaux = recus.filter(m => !avant.has(m.id));
+    if (!nouveaux.length) return;
+    rendreMessages(); rendreEchanges(); rendreDash();
+    if (annonce !== false) {
+      const m = nouveaux[0];
+      BS.toast("📩 Nouveau message de " + (m.de_nom || "un membre") + (m.titre_annonce ? " — « " + m.titre_annonce + " »" : ""));
+    }
+  }
+  $("#btnToutLu").onclick = async () => {
+    BS.chargement(true);
+    await Promise.all(recus.filter(m => !m.lu).map(m => BS.marquerLu(m.id)));
+    BS.chargement(false); BS.toast("Messages marqués comme lus"); charger();
+  };
+
+  /* ---------- Modale annonce ---------- */
+  function optionsCategories(sel) {
+    $("#aCat").innerHTML = cats.map(c => `<option ${c.nom === sel ? "selected" : ""}>${BS.esc(c.nom)}</option>`).join("");
+  }
+  const editeur = BS.editeurImages("aImages");
+  function ouvrirAnnonce(id) {
+    BS.nettoyerAlerte("msgAnn");
+    const a = id ? mesAnn.find(x => x.id === id) : null;
+    if (id && !a) return BS.toast("Annonce introuvable dans votre compte.");
+    if (a) {
+      $("#titreModale").textContent = "Modifier l'annonce";
+      $("#sousTitreModale").textContent = a.statut === "vendue"
+        ? "Annonce conclue : les modifications restent visibles dans votre historique"
+        : "Les changements sont visibles immédiatement dans le catalogue";
+      $("#aId").value = a.id; $("#aTitre").value = a.titre; $("#aAuteur").value = a.auteur;
+      $("#aIsbn").value = a.isbn || ""; optionsCategories(a.categorie); $("#aType").value = a.type;
+      $("#aPrix").value = a.prix; $("#aAnnee").value = a.annee || ""; $("#aEtat").value = a.etat;
+      $("#aDesc").value = a.description || "";
+    } else {
+      $("#titreModale").textContent = "Publier une annonce";
+      $("#sousTitreModale").textContent = "Renseignez les informations du livre";
+      $("#formAnnonce").reset(); $("#aId").value = ""; optionsCategories();
+    }
+    $("#aPrix").disabled = $("#aType").value === "Don";
+    editeur.charger(a);
+    BS.ouvrir("mAnnonce");
+  }
+  $("#formAnnonce").addEventListener("submit", async e => {
+    e.preventDefault();
+    const d = {
+      titre: $("#aTitre").value, auteur: $("#aAuteur").value, isbn: $("#aIsbn").value,
+      categorie: $("#aCat").value, type: $("#aType").value, prix: $("#aPrix").value,
+      annee: $("#aAnnee").value, etat: $("#aEtat").value, description: $("#aDesc").value
+    };
+    const id = $("#aId").value;
+    $("#btnEnregAnn").disabled = true; BS.chargement(true);
+    const r = id ? await BS.majAnnonce(+id, d) : await BS.creerAnnonce(d, moi);
+    const idA = id ? +id : r.id;
+    const ri = r.ok ? await BS.enregistrerImages(idA, editeur) : null;
+    BS.chargement(false); $("#btnEnregAnn").disabled = false;
+    if (!r.ok) return BS.alerte("msgAnn", "err", "✖ " + r.message);
+    if (!ri.ok) {
+      /* L'annonce existe : on bascule en mode modification pour réessayer sans doublon */
+      $("#aId").value = idA; $("#titreModale").textContent = "Modifier l'annonce";
+      BS.alerte("msgAnn", "err", "✖ Annonce enregistrée, mais les photos n'ont pas pu l'être : " + ri.message + " — cliquez à nouveau sur Enregistrer.");
+      return charger();
+    }
+    BS.fermer("mAnnonce"); BS.toast(id ? "Annonce modifiée" : "Annonce publiée dans le catalogue");
+    charger();
+  });
+  $("#aType").addEventListener("change", () => { $("#aPrix").disabled = $("#aType").value === "Don"; });
+  $("#btnPub1").onclick = $("#btnPub2").onclick = () => ouvrirAnnonce();
+
+  /* ---------- Réponse ---------- */
+  async function ouvrirReponse(idM) {
+    const m = recus.find(x => x.id === idM); if (!m) return;
+    await BS.marquerLu(m.id);
+    BS.nettoyerAlerte("msgRep");
+    $("#rVers").value = m.de_id; $("#rAnn").value = m.annonce_id || "";
+    $("#rDest").value = m.de_nom || "Membre";
+    $("#rOrigine").value = m.contenu; $("#rMsg").value = "";
+    BS.ouvrir("mRepondre");
+  }
+  $("#btnEnvoyerRep").onclick = async () => {
+    const idA = +$("#rAnn").value || null;
+    const ann = idA ? mesAnn.find(a => a.id === idA) : null;
+    BS.chargement(true);
+    const r = await BS.envoyerMessage($("#rVers").value, ann, $("#rMsg").value);
+    BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgRep", "err", "✖ " + r.message);
+    BS.alerte("msgRep", "ok", "✔ Réponse envoyée.");
+    setTimeout(() => { BS.fermer("mRepondre"); BS.toast("Réponse envoyée"); charger(); }, 900);
+  };
+
+  /* ---------- Photo de profil ---------- */
+  $("#btnPhoto").onclick = () => $("#inPhoto").click();
+  $("#inPhoto").onchange = async () => {
+    const f = $("#inPhoto").files[0]; $("#inPhoto").value = ""; if (!f) return;
+    BS.chargement(true); const r = await BS.majPhotoProfil(f); BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgProfil", "err", "✖ " + r.message);
+    Object.assign(moi, await BS.profil(true)); rendreDash(); BS.toast("Photo de profil mise à jour");
+  };
+  $("#btnSupprPhoto").onclick = async () => {
+    if (!confirm("Retirer votre photo de profil ?")) return;
+    BS.chargement(true); const r = await BS.supprimerPhotoProfil(); BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgProfil", "err", "✖ " + r.message);
+    moi.photo = ""; rendreDash(); BS.toast("Photo retirée");
+  };
+
+  /* ---------- Conclure : choisir l'acheteur ---------- */
+  function ouvrirConclure(a) {
+    BS.nettoyerAlerte("msgConclure");
+    $("#cId").value = a.id;
+    $("#cTitre").textContent = "« " + a.titre + " » — " + a.type;
+    const vus = new Map();
+    recus.filter(m => m.annonce_id === a.id).forEach(m => { if (!vus.has(m.de_id)) vus.set(m.de_id, m.de_nom || "Membre"); });
+    $("#cAcheteur").innerHTML = Array.from(vus, ([id, nom]) => `<option value="${id}">${BS.esc(nom)}</option>`).join("") +
+      '<option value="">Hors BookSwap / ne pas préciser (pas de note possible)</option>';
+    BS.ouvrir("mConclure");
+  }
+  $("#btnConclure").onclick = async () => {
+    BS.chargement(true);
+    const r = await BS.conclureAnnonce(+$("#cId").value, $("#cAcheteur").value || null);
+    BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgConclure", "err", "✖ " + r.message);
+    BS.fermer("mConclure"); BS.toast("Transaction enregistrée (+5 crédits)");
+    Object.assign(moi, await BS.profil(true)); charger();
+  };
+
+  /* ---------- Noter le vendeur ---------- */
+  function choisirNote(n) {
+    $("#nNote").value = n;
+    document.querySelectorAll("#nEtoiles button").forEach(b => b.classList.toggle("on", +b.dataset.note <= n));
+  }
+  $("#nEtoiles").addEventListener("click", e => { const b = e.target.closest("[data-note]"); if (b) choisirNote(+b.dataset.note); });
+  function ouvrirNoter(t) {
+    BS.nettoyerAlerte("msgNoter");
+    $("#nId").value = t.id; $("#nCom").value = ""; choisirNote(0);
+    $("#nTitre").textContent = "« " + t.titre + " » — " + BS.dateFR(t.created_at);
+    BS.ouvrir("mNoter");
+  }
+  $("#btnNoter").onclick = async () => {
+    BS.chargement(true);
+    const r = await BS.noterTransaction(+$("#nId").value, +$("#nNote").value, $("#nCom").value);
+    BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgNoter", "err", "✖ " + r.message);
+    BS.fermer("mNoter"); BS.toast("Merci ! Votre note a été enregistrée"); charger();
+  };
+
+  /* ---------- Profil ---------- */
+  function remplirProfil() {
+    $("#pNom").value = moi.nom; $("#pPrenom").value = moi.prenom || "";
+    $("#pMail").value = moi.email; $("#pTel").value = moi.telephone || ""; $("#pAdr").value = moi.adresse || "";
+  }
+  $("#formProfil").addEventListener("submit", async e => {
+    e.preventDefault(); BS.chargement(true);
+    const r = await BS.majProfil({
+      nom: $("#pNom").value, prenom: $("#pPrenom").value,
+      telephone: $("#pTel").value, adresse: $("#pAdr").value,
+      motDePasse: $("#pPass").value, confirmation: $("#pPass2").value
+    });
+    BS.chargement(false);
+    if (!r.ok) return BS.alerte("msgProfil", "err", "✖ " + r.message);
+    BS.alerte("msgProfil", "ok", "✔ Profil mis à jour.");
+    $("#pPass").value = $("#pPass2").value = "";
+    Object.assign(moi, await BS.profil(true));
+    BS.toast("Profil enregistré"); charger();
+  });
+
+  /* ---------- Actions déléguées ---------- */
+  document.addEventListener("click", async e => {
+    const mod = e.target.closest("[data-modif]"); if (mod) ouvrirAnnonce(+mod.dataset.modif);
+    const rep = e.target.closest("[data-repondre]"); if (rep) ouvrirReponse(+rep.dataset.repondre);
+    const cc = e.target.closest("[data-conclure]");
+    if (cc) ouvrirConclure(mesAnn.find(x => x.id === +cc.dataset.conclure));
+    const rs = e.target.closest("[data-reserver],[data-liberer]");
+    if (rs) {
+      const reserver = !!rs.dataset.reserver, id = +(rs.dataset.reserver || rs.dataset.liberer);
+      BS.chargement(true); const r = await BS.reserverAnnonce(id, reserver); BS.chargement(false);
+      BS.toast(r.ok ? (reserver ? "Annonce marquée « Réservé »" : "Annonce remise en vente") : r.message);
+      charger();
+    }
+    const nt = e.target.closest("[data-noter]");
+    if (nt) ouvrirNoter(achats.find(t => t.id === +nt.dataset.noter));
+    const rf = e.target.closest("[data-retirerfav]");
+    if (rf) {
+      const r = await BS.basculerFavori(+rf.dataset.retirerfav, true);
+      if (!r.ok) return BS.toast(r.message);
+      favoris = favoris.filter(a => a.id !== +rf.dataset.retirerfav); rendreFavoris(); BS.toast("Retiré de vos favoris");
+    }
+    const sup = e.target.closest("[data-suppr]");
+    if (sup) {
+      const a = mesAnn.find(x => x.id === +sup.dataset.suppr);
+      if (confirm(`Supprimer définitivement l'annonce « ${a.titre} » ?`)) {
+        BS.chargement(true); const r = await BS.supprimerAnnonce(a.id); BS.chargement(false);
+        BS.toast(r.ok ? "Annonce supprimée" : r.message); charger();
+      }
+    }
+  });
+  $("#fMes").addEventListener("input", rendreAnnonces);
+  $("#btnDeco").onclick = async () => {
+    if (confirm("Se déconnecter de BookSwap ?")) { await BS.deconnecter(); location.href = "connexion.html?deconnexion=1"; }
+  };
+
+  /* ---------- Premier administrateur (aucun SQL nécessaire) ---------- */
+  async function majCarteAdmin() {
+    const carte = $("#carteAdmin");
+    if (!carte) return;
+    carte.hidden = await BS.existeAdministrateur();
+  }
+  $("#btnDevenirAdmin").onclick = async () => {
+    if (!confirm("Prendre le rôle d'administrateur de BookSwap ?\n\nVous pourrez gérer les utilisateurs, modérer les annonces et traiter les signalements.")) return;
+    BS.chargement(true);
+    const r = await BS.revendiquerAdministrateur();
+    BS.chargement(false);
+    if (!r.ok) { BS.alerte("msgAdmin", "err", "✖ " + r.message); majCarteAdmin(); return; }
+    BS.alerte("msgAdmin", "ok", "✔ Vous êtes administrateur — ouverture du panneau…");
+    setTimeout(() => location.href = "administrateur.html", 1200);
+  };
+
+  BS.brancherModales();
+  await charger();
+  await majCarteAdmin();
+  BS.ecouterMessages(moi.id, () => nouveauxMessages());
+  setInterval(() => { if (!document.hidden) nouveauxMessages(); }, 60000);
+
+  /* Lien « Modifier mon annonce » depuis le catalogue : membre.html?modifier=ID */
+  const aModifier = +new URLSearchParams(location.search).get("modifier");
+  if (aModifier) {
+    history.replaceState(null, "", location.pathname);
+    go("livres"); ouvrirAnnonce(aModifier);
+  }
+});
+</script>
+</body>
+</html>
